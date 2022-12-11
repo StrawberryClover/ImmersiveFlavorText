@@ -1,0 +1,12 @@
+{
+  "Author": "Grinjr",
+  "Name": "Immersive Flavor Text",
+  "Punchline": "It provides more immersive flavor text.",
+  "Description": "My garbage quality plugin to help me learn how to work with Dalamud.\r\nSomewhat of a RP toolkit, so far it only provides immersive flavor text.",
+  "InternalName": "rpToolkit",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "roleplay",
+    "plugin"
+  ]
+}
