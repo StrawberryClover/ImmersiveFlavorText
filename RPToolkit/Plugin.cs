@@ -41,7 +41,7 @@ namespace RPToolkit
         private int currentTemperatureStage = 0;
         private int currentTemp;
         private int secPassed = 0;
-        private int secUntilDivergenceUpdate = 180;
+        private int secUntilDivergenceUpdate = 300;
         private int tempDivergence = 0;
         private int tempDivergenceLimit = 5;
         private int tempRainModifier;
@@ -177,7 +177,7 @@ namespace RPToolkit
                     break;
                 case "/pickpocket":
                     Random rnd = new Random();
-                    ChatHelper.SendChatMessage($"/emote pickpockets <t> for {String.Format("{0:n0}", rnd.Next(1,20000))}.");
+                    ChatHelper.SendChatMessage($"/emote pickpockets <t> for {String.Format("{0:n0}", rnd.Next(Configuration.minPickpocketAmt,Configuration.maxPickpocketAmt))}.");
                     break;
                 default:
                     break;

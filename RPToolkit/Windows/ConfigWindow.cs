@@ -18,7 +18,7 @@ public class ConfigWindow : Window, IDisposable
         ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
         ImGuiWindowFlags.NoScrollWithMouse)
     {
-        this.Size = new Vector2(324, 120);
+        this.Size = new Vector2(324, 220);
         this.SizeCondition = ImGuiCond.Always;
 
         this.Configuration = plugin.Configuration;
@@ -37,6 +37,7 @@ public class ConfigWindow : Window, IDisposable
             this.Configuration.Save();
         }
 
+        ImGui.NewLine();
         ImGui.Separator();
 
 
@@ -66,5 +67,24 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.EndCombo();
         }
+
+        ImGui.NewLine();
+        ImGui.Separator();
+
+        ImGui.PushItemWidth(120);
+        int minPickpocketAmt = this.Configuration.minPickpocketAmt;
+        if (ImGui.InputInt("Min Pickpocket Amt", ref minPickpocketAmt))
+        {
+            this.Configuration.minPickpocketAmt = minPickpocketAmt;
+            this.Configuration.Save();
+        }
+
+        int maxPickpocketAmt = this.Configuration.maxPickpocketAmt;
+        if (ImGui.InputInt("Max Pickpocket Amt", ref maxPickpocketAmt))
+        {
+            this.Configuration.maxPickpocketAmt = maxPickpocketAmt;
+            this.Configuration.Save();
+        }
+        ImGui.PopItemWidth();
     }
 }

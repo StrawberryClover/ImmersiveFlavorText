@@ -14,6 +14,9 @@ namespace RPToolkit
         public bool enableTemperatureMessages { get; set; } = true;
         public int SelectedParasolID { get; set; } = 58001;
 
+        public int minPickpocketAmt = 1;
+        public int maxPickpocketAmt = 20000;
+
         // the below exist just to make saving less cumbersome
         [NonSerialized]
         private DalamudPluginInterface? PluginInterface;

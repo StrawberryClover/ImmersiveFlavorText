@@ -1,12 +1,15 @@
 {
-  "Author": "Grinjr",
+  "Author": "Clover",
   "Name": "Immersive Flavor Text",
   "Punchline": "It provides more immersive flavor text.",
-  "Description": "My garbage quality plugin to help me learn how to work with Dalamud.\r\nSomewhat of a RP toolkit, so far it only provides immersive flavor text.",
+  "Description": "My garbage quality plugin to help me learn how to work with Dalamud.\r\nSomewhat of a RP toolkit, so far it only provides immersive flavor text.\r\n\r\n/umbrella : Takes out your umbrella.\r\n/pickpocket : Pickpockets target for random amount of gil.",
   "InternalName": "rpToolkit",
   "ApplicableVersion": "any",
   "Tags": [
     "roleplay",
     "plugin"
-  ]
+  ],
+  "RepuUrl": "https://github.com/StrawberryClover/ImmersiveFlavorText",
+  "IconUrl": "https://cdn.iconscout.com/icon/free/png-256/rain-drops-1671402-1422407.png",
+  "ImageUrls": []
 }
