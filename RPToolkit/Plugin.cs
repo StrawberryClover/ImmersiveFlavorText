@@ -214,12 +214,12 @@ namespace RPToolkit
                 {
                     if (rainWeathers.Contains(*currentWeather) && !rainWeathers.Contains(prevWeather) && !Condition[ConditionFlag.UsingParasol])
                     {
-                        ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.");
+                        ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Configuration.temperatureChatType, "Weather");
                         WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
                     }
                     else if (!rainWeathers.Contains(*currentWeather) && rainWeathers.Contains(prevWeather))
                     {
-                        ChatHelper.Echo("The rain begins to clear.");
+                        ChatHelper.Echo("The rain begins to clear.", Configuration.temperatureChatType, "Weather");
                     }
 
                     prevWeather = *currentWeather;
@@ -276,9 +276,9 @@ namespace RPToolkit
                 if (currentTemperatureStage != newStage)
                 {
                     if (newStage < currentTemperatureStage)
-                        ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc);
+                        ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc, Configuration.temperatureChatType, "Temperature");
                     else if (newStage > currentTemperatureStage)
-                        ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc);
+                        ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc, Configuration.temperatureChatType, "Temperature");
                     currentTemperatureStage = newStage;
                 }
             }

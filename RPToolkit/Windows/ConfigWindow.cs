@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -18,7 +19,7 @@ public class ConfigWindow : Window, IDisposable
         ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
         ImGuiWindowFlags.NoScrollWithMouse)
     {
-        this.Size = new Vector2(324, 220);
+        this.Size = new Vector2(324, 248);
         this.SizeCondition = ImGuiCond.Always;
 
         this.Configuration = plugin.Configuration;
@@ -35,6 +36,23 @@ public class ConfigWindow : Window, IDisposable
             this.Configuration.enableTemperatureMessages = enableTemperatureMessages;
 
             this.Configuration.Save();
+        }
+        var selectedChatType = this.Configuration.temperatureChatType;
+        if (ImGui.BeginCombo("Chat Type", selectedChatType.ToString())) // The second parameter is the label previewed before opening the combo.
+        {
+            foreach (XivChatType chatType in XivChatType.GetValues(typeof(XivChatType)))
+            {
+                bool is_selected = (chatType == selectedChatType); // You can store your selection however you want, outside or inside your objects
+                if (ImGui.Selectable(chatType.ToString(), is_selected))
+                {
+                    this.Configuration.temperatureChatType = chatType;
+
+                    this.Configuration.Save();
+                }
+                if (is_selected)
+                    ImGui.SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+            }
+            ImGui.EndCombo();
         }
 
         ImGui.NewLine();

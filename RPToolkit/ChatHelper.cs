@@ -1,3 +1,4 @@
+using Dalamud.Game.Text;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
@@ -56,9 +57,13 @@ namespace RPToolkit
             return _inputTextActive != IntPtr.Zero && *(bool*)_inputTextActive;
         }
 
-        public static void Echo(string message)
+        public static void Echo(string message, XivChatType chatType = XivChatType.Echo, string name = "")
         {
-            Plugin.chat.Print(message);
+            var chatMessage = new XivChatEntry();
+            chatMessage.Name = name;
+            chatMessage.Message = message;
+            chatMessage.Type = chatType;
+            Plugin.chat.PrintChat(chatMessage);
         }
 
         public static void SendChatMessage(string message)

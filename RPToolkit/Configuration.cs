@@ -1,4 +1,5 @@
 using Dalamud.Configuration;
+using Dalamud.Game.Text;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using System;
@@ -11,8 +12,9 @@ namespace RPToolkit
         public int Version { get; set; } = 1;
 
         public bool enableRainPopup { get; set; } = true;
-        public bool enableTemperatureMessages { get; set; } = true;
         public int SelectedParasolID { get; set; } = 58001;
+        public bool enableTemperatureMessages { get; set; } = true;
+        public XivChatType temperatureChatType = XivChatType.Echo;
 
         public int minPickpocketAmt = 1;
         public int maxPickpocketAmt = 20000;
