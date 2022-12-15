@@ -11,27 +11,24 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace RPToolkit.Windows;
 
-public class MainWindow : Window, IDisposable
+public class NoRainWindow : Window, IDisposable
 {
-    private TextureWrap parasolImage;
-    private int lastParasolCheckID;
+    private TextureWrap stowUmbrellaImage;
     private Plugin Plugin;
 
     float windowWidth = 250;
     float windowHeight = 160;
 
-    public MainWindow(Plugin plugin) : base(
-        "Rain Prompt", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize)
+    public unsafe NoRainWindow(Plugin plugin) : base(
+        "No Rain Prompt", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize)
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(windowWidth, windowHeight),
             MaximumSize = new Vector2(windowWidth, windowHeight)
         };
-
         this.Plugin = plugin;
 
-        lastParasolCheckID = plugin.Configuration.SelectedParasolID;
         CalcPosition();
         LoadTextures();
     }
@@ -48,29 +45,18 @@ public class MainWindow : Window, IDisposable
 
     public void Dispose()
     {
-        this.parasolImage.Dispose();
+        this.stowUmbrellaImage.Dispose();
     }
 
     public override void Draw()
     {
-        if (lastParasolCheckID != Plugin.Configuration.SelectedParasolID)
-        {
-            ReloadTextures();
-            lastParasolCheckID = Plugin.Configuration.SelectedParasolID;
-        }
-        //ImGui.Text($"The random config bool is {this.Plugin.Configuration.SomePropertyToBeSavedAndWithADefault}");
-
-        /*if (ImGui.Button("Show Settings"))
-        {
-            this.Plugin.DrawConfigUI();
-        }*/
-        string line = "You feel rain begin to fall upon your skin.";
+        string line = "The rain seems to have stopped.";
         float textWidth = ImGui.CalcTextSize(line).X;
 
         ImGui.SetCursorPosX((windowWidth - textWidth) * 0.5f);
         ImGui.Text(line);
 
-        line = "Would you like to bring out your umbrella?";
+        line = "Would you like to put away your umbrella?";
         textWidth = ImGui.CalcTextSize(line).X;
         ImGui.SetCursorPosX((windowWidth - textWidth) * 0.5f);
         ImGui.Text(line);
@@ -80,10 +66,10 @@ public class MainWindow : Window, IDisposable
         ImGui.SetCursorPosY(80);
         int imageSize = 64;
         ImGui.SetCursorPosX(windowWidth * 0.5f - imageSize / 2 - ImGui.GetStyle().CellPadding.X);
-        if (ImGui.ImageButton(parasolImage.ImGuiHandle, new Vector2(imageSize)))
+        if (ImGui.ImageButton(stowUmbrellaImage.ImGuiHandle, new Vector2(imageSize)))
         {
-            ChatHelper.SendChatMessage($"/fashion \"{Plugin.parasols[Plugin.Configuration.SelectedParasolID]}\"");
-            Plugin.WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
+            ChatHelper.SendChatMessage($"/fashion");
+            Plugin.WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
         }
 
         Vector2 buttonSize = ImGui.CalcTextSize("No");
@@ -91,7 +77,7 @@ public class MainWindow : Window, IDisposable
         ImGui.SetCursorPosX(windowWidth - (buttonSize.X + ImGui.GetStyle().CellPadding.Y) - 16);
         if (ImGui.Button("No"))
         {
-            Plugin.WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
+            Plugin.WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
         }
     }
 
@@ -103,15 +89,12 @@ public class MainWindow : Window, IDisposable
 
     public void LoadTextures()
     {
-        // you might normally want to embed resources and load them from the manifest stream
-        //var imagePath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-        //this.GoatImage = Plugin.PluginInterface.UiBuilder.LoadImage(imagePath);
-
-        var path = $"ui/icon/{Plugin.Configuration.SelectedParasolID / 1000 * 1000:000000}/{Plugin.Configuration.SelectedParasolID:000000}_hr1.tex";
+        // TODO: Find "put away" icon instead of this one
+        var path = $"ui/icon/{86 / 1000 * 1000:000000}/{86:000000}_hr1.tex";
         TexFile? iconFile = Plugin.Data.GetFile<TexFile>(path);
         if (iconFile != null)
         {
-            parasolImage = Plugin.UiBuilder.LoadImageRaw(iconFile.GetRgbaImageData(), iconFile.Header.Width, iconFile.Header.Height, 4);
+            stowUmbrellaImage = Plugin.UiBuilder.LoadImageRaw(iconFile.GetRgbaImageData(), iconFile.Header.Width, iconFile.Header.Height, 4);
         }
     }
 }

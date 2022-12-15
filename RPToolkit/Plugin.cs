@@ -20,11 +20,13 @@ using Dalamud.Game.Gui;
 using Dalamud.Interface;
 using Dalamud.Game.ClientState;
 using ImGuiNET;
+using System.Runtime.InteropServices;
 
 namespace RPToolkit
 {
     public unsafe sealed class Plugin : IDalamudPlugin
     {
+        public System.Drawing.Rectangle gameDimensions { get; private set; } = new System.Drawing.Rectangle();
         [PluginService] static internal SigScanner SigScanner { get; private set; }
         [PluginService] static internal DataManager Data { get; private set; }
         [PluginService] static internal Framework Framework { get; private set; }
@@ -80,10 +82,10 @@ namespace RPToolkit
         };
 
         public DalamudPluginInterface PluginInterface { get; private set; }
-        //public CommandManager CommandManager { get; private set; } = null!;
         public Configuration Configuration { get; init; }
         public WindowSystem WindowSystem = new("RPToolkit");
 
+        // I frickin suck at writing comments, so to anyone reading through this, good luck soldier and god speed
         public Plugin(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
         CommandManager commandManager,
@@ -101,14 +103,16 @@ namespace RPToolkit
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
 
+            GetGameDimensions();
 
             var world = this.clientState.LocalPlayer?.CurrentWorld.GameData.Name.RawString;
             PluginLog.Information($"Hello {world}!");
 
             WindowSystem.AddWindow(new ConfigWindow(this));
             WindowSystem.AddWindow(new MainWindow(this));
+            WindowSystem.AddWindow(new NoRainWindow(this));
 
-            foreach(Command cmd in commands)
+            foreach (Command cmd in commands)
             {
                 CommandManager.AddHandler(cmd.command, new CommandInfo(OnCommand)
                 {
@@ -133,6 +137,7 @@ namespace RPToolkit
             tick.AutoReset = true; // the key is here so it repeats
             tick.Elapsed += CheckWeather;
             tick.Elapsed += UpdateTemps;
+            tick.Elapsed += GetGameDimensions;
             tick.Start();
         }
 
@@ -170,7 +175,7 @@ namespace RPToolkit
                     break;
                 case "/rainwindow":
                     // in response to the slash command, just display our main ui
-                    WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
+                    WindowSystem.GetWindow("No Rain Prompt").IsOpen = true;
                     break;
                 case "/umbrella":
                     ChatHelper.SendChatMessage("/fashion \"Prim Dot Parasol\"");
@@ -215,11 +220,17 @@ namespace RPToolkit
                     if (rainWeathers.Contains(*currentWeather) && !rainWeathers.Contains(prevWeather) && !Condition[ConditionFlag.UsingParasol])
                     {
                         ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Configuration.temperatureChatType, "Weather");
+                        WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
                         WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
                     }
                     else if (!rainWeathers.Contains(*currentWeather) && rainWeathers.Contains(prevWeather))
                     {
                         ChatHelper.Echo("The rain begins to clear.", Configuration.temperatureChatType, "Weather");
+                        WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
+                        if (Condition[ConditionFlag.UsingParasol])
+                        {
+                            WindowSystem.GetWindow("No Rain Prompt").IsOpen = true;
+                        }
                     }
 
                     prevWeather = *currentWeather;
@@ -282,6 +293,22 @@ namespace RPToolkit
                     currentTemperatureStage = newStage;
                 }
             }
+        }
+
+        private void GetGameDimensions()
+        {
+            [DllImport("user32.dll", SetLastError = true)]
+            static extern bool GetWindowRect(IntPtr hWnd, out System.Drawing.Rectangle lpRect);
+
+            // temporary variable since you cannot output to this.gameDimensions
+            System.Drawing.Rectangle d;
+            GetWindowRect(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, out d);
+            this.gameDimensions = d;
+        }
+
+        private void GetGameDimensions(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            GetGameDimensions();
         }
     }
 }
