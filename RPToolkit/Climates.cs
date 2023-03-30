@@ -38,21 +38,12 @@ namespace RPToolkit
         public static float hottestHour = 15.5f;
         public static float coldestHour = 5.5f;
 
-        #region biomeTemps
-        private static int indoorHighTemp = 76;
-        private static int indoorLowTemp = 68;
-
-        private static int desertHighTemp = 100;
-        private static int desertLowTemp = 25;
-
-        private static int coastalHighTemp = 86;
-        private static int coastalLowTemp = 68;
-
-        private static int shrublandHighTemp = 79;
-        private static int shrublandLowTemp = 55;
-
-        private static int tundraHighTemp = 27;
-        private static int tundraLowTemp = 2;
+        #region Biome Temperature Variables
+        public static ZoneTemperature indoors = new ZoneTemperature(68, 76);
+        public static ZoneTemperature desert = new ZoneTemperature(25, 100);
+        public static ZoneTemperature coastal = new ZoneTemperature(68, 86);
+        public static ZoneTemperature shrubland = new ZoneTemperature(55, 79);
+        public static ZoneTemperature tundra = new ZoneTemperature(2, 27);
         #endregion
 
         public struct ZoneTemperature
@@ -60,41 +51,49 @@ namespace RPToolkit
             public int low;
             public int high;
 
-            public ZoneTemperature(int high, int low)
+            public ZoneTemperature(int low, int high)
             {
-                this.high = high;
                 this.low = low;
+                this.high = high;
             }
         }
 
-        public static Dictionary<ushort, ZoneTemperature> temperatures { get; private set; } = new Dictionary<ushort, ZoneTemperature>
+        /// <summary>
+        /// High and Low temperatures by zone.
+        /// </summary>
+        /// <value>
+        /// <br>Key: Zone ID</br>
+        /// <br>Value.low: Low Temperature</br>
+        /// <br>Value.high: High Temperature</br>
+        /// </value>
+        public static Dictionary<ushort, ZoneTemperature> zoneTemperatures { get; private set; } = new Dictionary<ushort, ZoneTemperature>
         {
             // Zone ID, Avg High Temp, Avg Low Temp (Yes, in the end I've decided to use Fahrenheit. I don't feel like using floats.)
-            {128, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Limsa (Upper)
-            {129, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Limsa (Lower)
-            {130, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Ul dah - Steps of Nald
-            {131, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Ul dah - Steps of Thal
-            {132, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //New Gridania
-            {133, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //Old Gridania
-            {134, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Middle La Noscea
-            {135, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Lower La Noscea
-            {137, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Eastern La Noscea
-            {138, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Western La Noscea
-            {139, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Upper La Noscea
-            {140, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Western Thanalan
-            {141, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Central Thanalan
-            {144, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Gold Saucer
-            {145, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Eastern Thanalan
-            {146, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Southern Thanalan
-            {147, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Northern Thanalan
-            {148, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //Central Shroud
+            {128, coastal}, //Limsa (Upper)
+            {129, coastal}, //Limsa (Lower)
+            {130, desert}, //Ul dah - Steps of Nald
+            {131, desert}, //Ul dah - Steps of Thal
+            {132, shrubland}, //New Gridania
+            {133, shrubland}, //Old Gridania
+            {134, coastal}, //Middle La Noscea
+            {135, coastal}, //Lower La Noscea
+            {137, coastal}, //Eastern La Noscea
+            {138, coastal}, //Western La Noscea
+            {139, coastal}, //Upper La Noscea
+            {140, desert}, //Western Thanalan
+            {141, desert}, //Central Thanalan
+            {144, indoors}, //Gold Saucer
+            {145, desert}, //Eastern Thanalan
+            {146, desert}, //Southern Thanalan
+            {147, desert}, //Northern Thanalan
+            {148, shrubland}, //Central Shroud
             {150, new ZoneTemperature(30, 50)}, //[Dungeon]KeepersOfTheLake
-            {152, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //East Shroud
-            {153, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //South Shroud
-            {154, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //North Shroud
-            {155, new ZoneTemperature(tundraHighTemp, tundraLowTemp)}, //Coerthas
+            {152, shrubland}, //East Shroud
+            {153, shrubland}, //South Shroud
+            {154, shrubland}, //North Shroud
+            {155, tundra}, //Coerthas
             {156, new ZoneTemperature(30, 50)}, //Mor Dhona
-            /*{157, new ZoneTemperature(0, 0)}, //[Dungeon]Sastasha
+            {157, new ZoneTemperature(0, 0)}, //[Dungeon]Sastasha
             {158, new ZoneTemperature(0, 0)}, //[Dungeon]Brayflox
             {159, new ZoneTemperature(0, 0)}, //[Dungeon]WanderersPalace
             {160, new ZoneTemperature(0, 0)}, //[Dungeon]PharosSirius
@@ -108,40 +107,40 @@ namespace RPToolkit
             {169, new ZoneTemperature(0, 0)}, //[Dungeon]TotoRak
             {170, new ZoneTemperature(0, 0)}, //[Dungeon]CuttersCry
             {171, new ZoneTemperature(0, 0)}, //[Dungeon]DzemaelDarkhold
-            {172, new ZoneTemperature(0, 0)}, //[Dungeon]AurumVale*/
-            {175, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den
-            {177, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Limsa Lominsa - Inn
-            {178, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Ul dah - Inn
-            {179, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Gridania - Inn
-            {180, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Outer La Noscea
-            {181, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Limsa (Upper)
-            {182, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Ul dah - Steps of Nald
-            {183, new ZoneTemperature(shrublandHighTemp, shrublandLowTemp)}, //New Gridania
-            {186, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den
-            {198, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Limsa Lominsa - Command
-            //{202, new ZoneTemperature(0, 0)}, //[Trial]Ifrit
-            //{204, new ZoneTemperature(0, 0)}, //Gridania - First Bow
-            //{205, new ZoneTemperature(0, 0)}, //Lotus Stand
-            //{206, new ZoneTemperature(0, 0)}, //[Trial]Titan
-            //{207, new ZoneTemperature(0, 0)}, //[Trial]MoogleMog
-            //{208, new ZoneTemperature(0, 0)}, //[Trial]Garuda
-            {210, new ZoneTemperature(desertHighTemp, desertLowTemp)}, //Ul dah - Heart of the Sworn
-            {212, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Waking Sands
-            {250, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den Pier
-            //{281, new ZoneTemperature(0, 0)}, //[Trial]Leviathan
-            //{286, new ZoneTemperature(0, 0)}, //ImOnABoat
-            //{288, new ZoneTemperature(0, 0)}, //ImOnABoat
-            //{331, new ZoneTemperature(0, 0)}, //Garuda_Entrance
-            //{332, new ZoneTemperature(0, 0)}, //[Trial]CapeWestwind
-            {336, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den
-            {337, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den
-            {341, new ZoneTemperature(91, 60)}, //The Goblet
-            {345, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Private Cottage - The Goblet
-            //{349, new ZoneTemperature(0, 0)}, //[Dungeon]CopperbellHM
-            //{350, new ZoneTemperature(0, 0)}, //[Dungeon]HaukkeHM
-            {351, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Rising Stones
-            {352, new ZoneTemperature(coastalHighTemp, coastalLowTemp)}, //Wolves Den
-            /*{360, new ZoneTemperature(0, 0)}, //[Dungeon]HalataliHM
+            {172, new ZoneTemperature(0, 0)}, //[Dungeon]AurumVale
+            {175, coastal}, //Wolves Den
+            {177, indoors}, //Limsa Lominsa - Inn
+            {178, indoors}, //Ul dah - Inn
+            {179, indoors}, //Gridania - Inn
+            {180, coastal}, //Outer La Noscea
+            {181, coastal}, //Limsa (Upper)
+            {182, desert}, //Ul dah - Steps of Nald
+            {183, shrubland}, //New Gridania
+            {186, coastal}, //Wolves Den
+            {198, coastal}, //Limsa Lominsa - Command
+            {202, new ZoneTemperature(0, 0)}, //[Trial]Ifrit
+            {204, new ZoneTemperature(0, 0)}, //Gridania - First Bow
+            {205, new ZoneTemperature(0, 0)}, //Lotus Stand
+            {206, new ZoneTemperature(0, 0)}, //[Trial]Titan
+            {207, new ZoneTemperature(0, 0)}, //[Trial]MoogleMog
+            {208, new ZoneTemperature(0, 0)}, //[Trial]Garuda
+            {210, desert}, //Ul dah - Heart of the Sworn
+            {212, indoors}, //Waking Sands
+            {250, coastal}, //Wolves Den Pier
+            {281, new ZoneTemperature(0, 0)}, //[Trial]Leviathan
+            {286, new ZoneTemperature(0, 0)}, //ImOnABoat
+            {288, new ZoneTemperature(0, 0)}, //ImOnABoat
+            {331, new ZoneTemperature(0, 0)}, //Garuda_Entrance
+            {332, new ZoneTemperature(0, 0)}, //[Trial]CapeWestwind
+            {336, coastal}, //Wolves Den
+            {337, coastal}, //Wolves Den
+            {341, new ZoneTemperature(60, 91)}, //The Goblet
+            {345, indoors}, //Private Cottage - The Goblet
+            {349, new ZoneTemperature(0, 0)}, //[Dungeon]CopperbellHM
+            {350, new ZoneTemperature(0, 0)}, //[Dungeon]HaukkeHM
+            {351, indoors}, //Rising Stones
+            {352, coastal}, //Wolves Den
+            {360, new ZoneTemperature(0, 0)}, //[Dungeon]HalataliHM
             {361, new ZoneTemperature(0, 0)}, //[Dungeon]HullbreakerIsle
             {362, new ZoneTemperature(0, 0)}, //[Dungeon]BrayfloxHM
             {363, new ZoneTemperature(0, 0)}, //[Dungeon]LostCity
@@ -152,30 +151,30 @@ namespace RPToolkit
             {374, new ZoneTemperature(0, 0)}, //[Trial]Ramuh
             {376, new ZoneTemperature(0, 0)}, //Frontlines
             {377, new ZoneTemperature(0, 0)}, //[Trial]Shiva
-            {387, new ZoneTemperature(0, 0)}, //[Dungeon]SastashaHM*/
-            {388, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Gold Saucer - Chocobo Square
-            //{395, new ZoneTemperature(0, 0)}, //Intercessory
-            {397, new ZoneTemperature(tundraHighTemp, tundraLowTemp)}, //Coerthas Western Highlands
+            {387, new ZoneTemperature(0, 0)}, //[Dungeon]SastashaHM
+            {388, indoors}, //Gold Saucer - Chocobo Square
+            {395, new ZoneTemperature(0, 0)}, //Intercessory
+            {397, tundra}, //Coerthas Western Highlands
             {398, new ZoneTemperature(0, 0)}, //The Dravanian Forelands
             {399, new ZoneTemperature(0, 0)}, //The Dravanian Hinterlands
             {400, new ZoneTemperature(0, 0)}, //The Churning Mists
             {401, new ZoneTemperature(0, 0)}, //Sea of Clouds
             {402, new ZoneTemperature(0, 0)}, //Azys Lla
-            {418, new ZoneTemperature(tundraHighTemp, tundraLowTemp)}, //Ishgard - Foundation
-            {419, new ZoneTemperature(tundraHighTemp, tundraLowTemp)}, //Ishgard - The Pillars
-            /*{421, new ZoneTemperature(0, 0)}, //[Dungeon]Vault
+            {418, tundra}, //Ishgard - Foundation
+            {419, tundra}, //Ishgard - The Pillars
+            {421, new ZoneTemperature(0, 0)}, //[Dungeon]Vault
             {422, new ZoneTemperature(0, 0)}, //Frontlines - Slaughter
-            {426, new ZoneTemperature(0, 0)}, //[Trial]Chrysalis*/
-            {427, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Ishgard - Scholasticate
-            {433, new ZoneTemperature(indoorHighTemp, indoorLowTemp)}, //Ishgard - Fortempts Manor
-            /*{434, new ZoneTemperature(0, 0)}, //[Dungeon]DuskVigil
+            {426, new ZoneTemperature(0, 0)}, //[Trial]Chrysalis
+            {427, indoors}, //Ishgard - Scholasticate
+            {433, indoors}, //Ishgard - Fortempts Manor
+            {434, new ZoneTemperature(0, 0)}, //[Dungeon]DuskVigil
             {435, new ZoneTemperature(0, 0)}, //[Dungeon]Aery
             {439, new ZoneTemperature(0, 0)}, //Ishgard - Chocobo Proving Grounds
             {441, new ZoneTemperature(0, 0)}, //[Dungeon]SohmAl
-            {456, new ZoneTemperature(0, 0)}, //Ishgard - Ruling Chamber*/
+            {456, new ZoneTemperature(0, 0)}, //Ishgard - Ruling Chamber
             {463, new ZoneTemperature(0, 0)}, //Matoyas Cave
             {478, new ZoneTemperature(0, 0)}, //Idyllshire
-            //{554, new ZoneTemperature(0, 0)}, //[PVP] - Fields of Glory (Shatter)
+            {554, new ZoneTemperature(0, 0)}, //[PVP] - Fields of Glory (Shatter)
             {612, new ZoneTemperature(0, 0)}, //The Fringes
             {613, new ZoneTemperature(0, 0)}, //The Ruby Sea
             {614, new ZoneTemperature(0, 0)}, //Yanxia
@@ -185,9 +184,37 @@ namespace RPToolkit
             {628, new ZoneTemperature(0, 0)}, //Kugane
             {635, new ZoneTemperature(0, 0)}, //Rhalgrs Reach
             {639, new ZoneTemperature(0, 0)}, //Ruby Bazaar Offices
-            //{680, new ZoneTemperature(0, 0)}, //ImOnABoatAgain
+            {680, new ZoneTemperature(0, 0)}, //ImOnABoatAgain
             {681, new ZoneTemperature(0, 0)}, //The House of the Fierce
             {683, new ZoneTemperature(0, 0)} //First Alter of Djanan
+        };
+
+        /// <summary>
+        /// How much weather affects the temperature.
+        /// </summary>
+        /// <value>
+        /// <br>Key: Weather ID</br>
+        /// <br>Value: Temperature Offset</br>
+        /// </value>
+        public static Dictionary<int, int> weatherTemperatures { get; private set; } = new Dictionary<int, int>
+        {
+            {1, 0}, //Clear Skies
+            {2, 0}, //Fair Skies
+            {3, -2}, //Clouds
+            {4, -8}, //Fog
+            {5, -2}, //Wind
+            {6, -3}, //Gales
+            {7, -6}, //Rain
+            {8, -8}, //Shower
+            {9, -2}, //Thunder
+            {10, -10}, //Thunderstorms
+            {11, 1}, //Dust Storms
+            {12, 2}, //Sandstorms
+            {13, 6}, //Hot Spells
+            {14, 10}, //Heat Waves
+            {15, -6}, //Snows
+            {16, -10}, //Blizzards
+            {17, -3}, //Gloom
         };
 
         public static int GetTemperature(ushort zoneId, float time)
@@ -207,7 +234,7 @@ namespace RPToolkit
             }
             //int temp = (int)Math.Round(perc * (temperatures[zoneId].high - temperatures[zoneId].low) + temperatures[zoneId].low);
             //PluginLog.Information($"{perc}: {SinDistribution(perc, 0.5, 2.0, temperatures[zoneId].low, temperatures[zoneId].high)}");
-            int temp = (int)Math.Round(SinDistribution(perc, 0.5, 2.0, temperatures[zoneId].low, temperatures[zoneId].high));
+            int temp = (int)Math.Round(SinDistribution(perc, 0.5, 2.0, zoneTemperatures[zoneId].low, zoneTemperatures[zoneId].high));
             //PluginLog.Information($"{perc + ((perc - 0.5) * 0.5)}");
 
             return temp;
