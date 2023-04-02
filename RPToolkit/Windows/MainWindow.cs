@@ -11,7 +11,8 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace RPToolkit.Windows;
 
-public class MainWindow : Window, IDisposable
+/*
+public class RainWindow : Window, IDisposable
 {
     private TextureWrap parasolImage;
     private int lastParasolCheckID;
@@ -20,7 +21,7 @@ public class MainWindow : Window, IDisposable
     float windowWidth = 250;
     float windowHeight = 160;
 
-    public MainWindow(Plugin plugin) : base(
+    public RainWindow(Plugin plugin) : base(
         "Rain Prompt", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize)
     {
         this.SizeConstraints = new WindowSizeConstraints
@@ -58,12 +59,6 @@ public class MainWindow : Window, IDisposable
             ReloadTextures();
             lastParasolCheckID = Plugin.Configuration.SelectedParasolID;
         }
-        //ImGui.Text($"The random config bool is {this.Plugin.Configuration.SomePropertyToBeSavedAndWithADefault}");
-
-        /*if (ImGui.Button("Show Settings"))
-        {
-            this.Plugin.DrawConfigUI();
-        }*/
         string line = "You feel rain begin to fall upon your skin.";
         float textWidth = ImGui.CalcTextSize(line).X;
 
@@ -115,3 +110,4 @@ public class MainWindow : Window, IDisposable
         }
     }
 }
+*/

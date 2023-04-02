@@ -11,6 +11,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace RPToolkit.Windows;
 
+/*
 public class NoRainWindow : Window, IDisposable
 {
     private TextureWrap stowUmbrellaImage;
@@ -98,3 +99,4 @@ public class NoRainWindow : Window, IDisposable
         }
     }
 }
+*/

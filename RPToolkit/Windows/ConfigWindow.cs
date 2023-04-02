@@ -1,34 +1,102 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
+using Dalamud.Logging;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
+using Newtonsoft.Json.Linq;
 
 namespace RPToolkit.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
     private Configuration Configuration;
-
-    int currentParasol;
+    private List<uint> jobEnums = new List<uint>();
 
     public ConfigWindow(Plugin plugin) : base(
         $"{plugin.Name} Config Window",
-        ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
         ImGuiWindowFlags.NoScrollWithMouse)
     {
-        this.Size = new Vector2(324, 248);
-        this.SizeCondition = ImGuiCond.Always;
+        this.Size = new Vector2(450, 248);
+        this.SizeCondition = ImGuiCond.FirstUseEver;
 
         this.Configuration = plugin.Configuration;
-        this.currentParasol = this.Configuration.SelectedParasolID;
+
+
+        var baseJobEnums = (uint[])Enum.GetValues(typeof(ClimateOutfitData.Jobs));
+        for (uint e = 0; e < baseJobEnums.Length; e++)
+        {
+            if (e == 7) e = 18;
+            jobEnums.Add(baseJobEnums[e]);
+        }
+        for (uint e = 7; e < 18; e++)
+        {
+            if (baseJobEnums[e] != null) jobEnums.Add(baseJobEnums[e]);
+        }
     }
 
     public void Dispose() { }
 
     public override void Draw()
+    {
+        if (ImGui.BeginTabBar("mainTabBar"))
+        {
+            if (ImGui.BeginTabItem("Climate"))
+            {
+                DrawClimateSettings();
+                ImGui.EndTabItem();
+            }
+
+            ImGui.PushID("Misc");
+            if (ImGui.BeginTabItem("Misc & Extras"))
+            {
+                DrawMiscSettings();
+                ImGui.EndTabItem();
+            }
+            ImGui.PopID();
+
+            ImGui.EndTabBar();
+        }
+    }
+
+    private void DrawClimateSettings()
+    {
+        if (ImGui.BeginTabBar("climateTabBar"))
+        {
+            if (ImGui.BeginTabItem("General"))
+            {
+                DrawGeneralClimateSettings();
+                ImGui.EndTabItem();
+            }
+
+            if (!Plugin.Singleton.glamourerAvailable)
+            {
+                ImGui.BeginDisabled();
+            }
+            if (ImGui.BeginTabItem("Climate Outfits"))
+            {
+                DrawClimateOutfitSettings();
+                ImGui.EndTabItem();
+            }
+            ImGui.EndDisabled();
+            if (!Plugin.Singleton.glamourerAvailable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                //ImGui.SetNextWindowBgAlpha(1);
+                ImGui.BeginTooltip();
+                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Glamourer plugin is not loaded.");
+                ImGui.Text("This is a required dependency if you want \r\nto change your outfits based on temperature.");
+                ImGui.EndTooltip();
+            }
+
+            ImGui.EndTabBar();
+        }
+    }
+
+    private void DrawGeneralClimateSettings()
     {
         var enableTemperatureMessages = this.Configuration.enableTemperatureMessages;
         if (ImGui.Checkbox("Temperature update flavor text", ref enableTemperatureMessages))
@@ -54,41 +122,107 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.EndCombo();
         }
-
-        ImGui.NewLine();
-        ImGui.Separator();
-
-
-        // can't ref a property, so use a local copy
-        var enableRainPopup = this.Configuration.enableRainPopup;
-        if (ImGui.Checkbox("Enable rain popup window", ref enableRainPopup))
+        ImGui.Spacing();
+        ImGui.Spacing();
+        var showTemperatureSuggestionPopup = this.Configuration.showTemperatureSuggestionPopup;
+        if (ImGui.Checkbox("Help contribute temperature data for zones", ref showTemperatureSuggestionPopup))
         {
-            this.Configuration.enableRainPopup = enableRainPopup;
-            // can save immediately on change, if you don't want to provide a "Save and Close" button
+            this.Configuration.showTemperatureSuggestionPopup = showTemperatureSuggestionPopup;
             this.Configuration.Save();
         }
+    }
 
-        if (ImGui.BeginCombo("Selected Parasol", Plugin.parasols[currentParasol])) // The second parameter is the label previewed before opening the combo.
+    private void DrawClimateOutfitSettings()
+    {
+        for (int i = 0; i < this.Configuration.climateOutfitData.Count; i++)
         {
-            foreach (KeyValuePair<int, string> parasolData in Plugin.parasols)
+            ImGui.PushItemWidth(90);
+            ImGui.PushID("jobCombo" + i);
+            string jobLabelText = Enum.GetName(typeof(ClimateOutfitData.Jobs), this.Configuration.climateOutfitData[i].jobID);
+            if (ImGui.BeginCombo("", jobLabelText != null ? jobLabelText : "Select Job"))
             {
-                bool is_selected = (currentParasol == parasolData.Key); // You can store your selection however you want, outside or inside your objects
-                if (ImGui.Selectable(parasolData.Value, is_selected))
+                foreach (uint value in jobEnums)
                 {
-                    currentParasol = parasolData.Key;
-                    this.Configuration.SelectedParasolID = parasolData.Key;
-
-                    this.Configuration.Save();
+                    string valueName = Enum.GetName(typeof(ClimateOutfitData.Jobs), value);
+                    ImGui.PushID(valueName + i);
+                    bool isSelected = (value == this.Configuration.climateOutfitData[i].jobID);
+                    if (ImGui.Selectable(valueName.Replace("_", " "), isSelected))
+                    {
+                        this.Configuration.climateOutfitData[i].jobID = value;
+                        this.Configuration.Save();
+                    }
+                    if (isSelected)
+                        ImGui.SetItemDefaultFocus();
+                    ImGui.PopID();
                 }
-                if (is_selected)
-                    ImGui.SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                ImGui.EndCombo();
             }
-            ImGui.EndCombo();
+            ImGui.PopID();
+            ImGui.PopItemWidth();
+
+            ImGui.SameLine();
+            ImGui.PushItemWidth(175);
+            ImGui.PushID("tempConditionCombo" + i);
+            string climateConditionsLabelText = "";
+            foreach (int value in Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)))
+            {
+                if ((this.Configuration.climateOutfitData[i].climateConditions & value) == value)
+                    climateConditionsLabelText += $"{Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value)}, ";
+            }
+            climateConditionsLabelText = climateConditionsLabelText.TrimEnd(',', ' ').Replace("_", " ");
+            if (ImGui.BeginCombo("", climateConditionsLabelText != "" ? climateConditionsLabelText : "Select Climate Conditions"))
+            {
+                foreach (int value in Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)))
+                {
+                    string valueName = Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value);
+                    ImGui.PushID(valueName + i);
+                    bool isSelected = (this.Configuration.climateOutfitData[i].climateConditions & value) == value;
+                    if (ImGui.Selectable(valueName.Replace("_", " "), isSelected, ImGuiSelectableFlags.DontClosePopups))
+                    {
+                        this.Configuration.climateOutfitData[i].climateConditions ^= value;
+                        this.Configuration.Save();
+                    }
+                    ImGui.PopID();
+                }
+                ImGui.EndCombo();
+            }
+            ImGui.PopID();
+            ImGui.PopItemWidth();
+
+            ImGui.SameLine();
+            ImGui.PushID("updateAppearance" + i);
+            if (ImGui.Button("Update Appearance"))
+            {
+                this.Configuration.climateOutfitData[i].customizationString = Plugin.Singleton.GetGlamourerCurrentEquipment();
+                this.Configuration.Save();
+            }
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                //ImGui.SetNextWindowBgAlpha(1);
+                ImGui.BeginTooltip();
+                ImGui.Text("Saves your currently worn glamourer equipment.");
+                ImGui.EndTooltip();
+            }
+            ImGui.PopID();
+
+            ImGui.SameLine();
+            ImGui.PushID("deleteOutfitData" + i);
+            if (ImGui.Button("X"))
+            {
+                this.Configuration.climateOutfitData.RemoveAt(i);
+                this.Configuration.Save();
+            }
         }
 
-        ImGui.NewLine();
-        ImGui.Separator();
+        if (ImGui.Button("+"))
+        {
+            this.Configuration.climateOutfitData.Add(new ClimateOutfitData(Plugin.Singleton.clientState.LocalPlayer != null ? Plugin.Singleton.clientState.LocalPlayer.ClassJob.Id : 0, 0, Plugin.Singleton.GetGlamourerCurrentEquipment()));
+            this.Configuration.Save();
+        }
+    }
 
+    private void DrawMiscSettings()
+    {
         ImGui.PushItemWidth(120);
         int minPickpocketAmt = this.Configuration.minPickpocketAmt;
         if (ImGui.InputInt("Min Pickpocket Amt", ref minPickpocketAmt))

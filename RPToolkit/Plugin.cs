@@ -32,11 +32,25 @@ using FFXIVClientStructs.STD;
 using CharacterPanelRefined;
 using static CharacterPanelRefined.Tooltips;
 using FFXIVClientStructs.Interop;
+using System.Diagnostics;
+using System.Runtime.ExceptionServices;
+using Dalamud.Plugin.Internal;
+using Lumina;
+using System.Reflection.Metadata;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Ipc;
+using Dalamud.Game.ClientState.Resolvers;
+using Dalamud.Interface.Internal.Notifications;
+using Newtonsoft.Json.Linq;
+using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace RPToolkit
 {
     public unsafe sealed class Plugin : IDalamudPlugin
     {
+        public static Plugin Singleton { get; private set; }
+
         public System.Drawing.Rectangle gameDimensions { get; private set; } = new System.Drawing.Rectangle();
         [PluginService] static internal SigScanner SigScanner { get; private set; }
         [PluginService] static internal DataManager Data { get; private set; }
@@ -44,9 +58,16 @@ namespace RPToolkit
         [PluginService] static internal Dalamud.Game.ClientState.Conditions.Condition Condition { get; private set; }
         public static CommandManager CommandManager { get; private set; } = null!;
         public static GameGui GameGui { get; private set; } = null!;
-        private readonly ClientState clientState;
+        public readonly ClientState clientState;
         public static ChatGui chat { get; private set; } = null!;
         public static UiBuilder UiBuilder { get; private set; } = null!;
+
+        private readonly ObjectTable _objectTable;
+        private readonly ICallGateSubscriber<int> _glamourerApiVersion;
+        private readonly ICallGateSubscriber<string, GameObject?, object>? _glamourerApplyOnlyEquipment;
+        private readonly ICallGateSubscriber<GameObject?, string>? _glamourerGetAllCustomization;
+        private string currentCustomizationString;
+        public bool glamourerAvailable { get; private set; }
 
         internal IntPtr TimeAsmPtr;
         internal long* TrueTime;
@@ -59,6 +80,7 @@ namespace RPToolkit
         private int temperatureDivergenceLimit = 5;
         private bool updateCharacterPanel = false;
 
+        private int currentZone;
         internal byte* currentWeather;
         internal byte prevWeather;
         internal Dictionary<byte, string> weathers;
@@ -86,42 +108,62 @@ namespace RPToolkit
 
         public string Name => "Immersive Flavor Text";
         private Command[] commands = {
-            new Command("/rainwindow", "Open the rain popup window, for testing purposes."), 
+            new Command("/immersiveconfig", "Opens up the config window."),
             new Command("/checkweather", "Checks the weather, for testing purposes."),
-            new Command("/umbrella", "Takes out your umbrella."),
-            new Command("/pickpocket", "Pickpockets your target for a random amount of gil.")
+            new Command("/pickpocket", "Pickpockets your target for a random amount of gil."),
+            new Command("/suggestion", "Opens up the temperature suggestion window.")
         };
 
         public DalamudPluginInterface PluginInterface { get; private set; }
         public Configuration Configuration { get; init; }
         public WindowSystem WindowSystem = new("RPToolkit");
 
-        // I frickin suck at writing comments, so to anyone reading through this, good luck soldier and god speed
+        // I frickin suck at remembering to write comments on personal projects
+        // so to anyone reading through this, good luck soldier and god speed
         public Plugin(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
         CommandManager commandManager,
         GameGui gameGui,
         ClientState clientState,
-        ChatGui chatGui)
+        ChatGui chatGui,
+        ObjectTable objectTable)
         {
+            PluginLog.Information((Singleton == null).ToString());
+            if (Singleton != null)
+            {
+                Singleton.Dispose();
+            }
+            Singleton = this;
+
+            #region Dalamud Initialization
+            AppDomain.CurrentDomain.FirstChanceException += HandleException;
             this.PluginInterface = pluginInterface;
             CommandManager = commandManager;
             GameGui = gameGui;
             this.clientState = clientState;
             UiBuilder = this.PluginInterface.UiBuilder;
             chat = chatGui;
+            _objectTable = objectTable;
 
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
+            #endregion
+
+            #region Other Plugin API Initialization
+            _glamourerApiVersion = pluginInterface.GetIpcSubscriber<int>("Glamourer.ApiVersion");
+            _glamourerApplyOnlyEquipment = pluginInterface.GetIpcSubscriber<string, GameObject?, object>("Glamourer.ApplyOnlyEquipmentToCharacter");
+            _glamourerGetAllCustomization = pluginInterface.GetIpcSubscriber<GameObject?, string>("Glamourer.GetAllCustomizationFromCharacter");
+            #endregion
 
             GetGameDimensions();
 
             var world = this.clientState.LocalPlayer?.CurrentWorld.GameData.Name.RawString;
             PluginLog.Information($"Hello {world}!");
 
+            #region Windows Initialization
             WindowSystem.AddWindow(new ConfigWindow(this));
-            WindowSystem.AddWindow(new MainWindow(this));
-            WindowSystem.AddWindow(new NoRainWindow(this));
+            WindowSystem.AddWindow(new TempSuggestionWindow(this));
+            #endregion
 
             foreach (Command cmd in commands)
             {
@@ -149,13 +191,32 @@ namespace RPToolkit
             tick.Elapsed += CheckWeather;
             tick.Elapsed += UpdateTemps;
             tick.Elapsed += GetGameDimensions;
+            tick.Elapsed += PeriodicApiStateCheck;
+            tick.Elapsed += PeriodicOutfitChangeCheck;
             tick.Start();
 
+            /*bool glamourerInstalled = pluginInterface.PluginInternalNames.Contains("Glamourer");
+            PluginLog.Information(glamourerInstalled ? "Glamourer has been detected. Enabling functionality." : "Glamourer not detected.");
+            //_objectTable.CreateObjectReference(this.clientState.LocalPlayer?.Address);
+            if (this.clientState.LocalPlayer is Character c)
+            {
+                PluginLog.Information(_glamourerGetAllCustomization!.InvokeFunc(c));
+                _glamourerApplyOnlyEquipment!.InvokeAction("Ah3/DwQBAWQHAWaAa3IsWQBVAXKCBAACB0sDKIAsWQIvAAIAALoCMAABAACtEwgAjQABZjwBAWYxAAZmuBcBZmQAAWZiAAEANQABADsAAgA1AAEAAQAAAIA/Aw==", c);
+            }
+            PluginLog.Information(this.clientState.LocalPlayer?.ClassJob.GameData.Abbreviation);*/
 
+            //var wetness = (float*)(*(IntPtr*)SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 48 83 C1 10 48 89 74 24"));
+            //var wetness = SigScanner.ScanData("218895E9D80");
+            //PluginLog.Information($"Wetness: {wetness}");
+            //PluginLog.Information("Map Title: " + Data.GetExcelSheet<TerritoryType>()?.GetRow(this.clientState.TerritoryType).PlaceName.Value.Name.RawString);
+            //this.clientState.TerritoryChanged +=
+            //NetHelper.SubmitDataAsync(this.clientState.LocalPlayer?.Name.ToString(), Data.GetExcelSheet<TerritoryType>()?.GetRow(this.clientState.TerritoryType).PlaceName.Value.Name.RawString, currentTemp.ToString(), currentTemp.ToString());
+
+
+            SignatureHelper.Initialise(this);
             if (updateCharacterPanel)
             {
                 tooltips = new Tooltips();
-                SignatureHelper.Initialise(this);
                 characterStatusOnSetup.Enable();
             }
         }
@@ -172,6 +233,16 @@ namespace RPToolkit
             }
         }
 
+        private void HandleException(object? sender, FirstChanceExceptionEventArgs eventArgs)
+        {
+            if (eventArgs.Exception.Source == GetType().Namespace)
+            {
+                PluginLog.LogError($"{eventArgs.Exception.Source}: Uh oh, stuff just crashed! Better clean up after myself...");
+                this.Dispose();
+                //Reload Plugin? idk how to do that yet
+            }
+        }
+
         public void Dispose()
         {
             tick.Dispose();
@@ -181,8 +252,13 @@ namespace RPToolkit
                 CommandManager.RemoveHandler(cmd.command);
             }
 
-            characterStatusOnSetup.Dispose();
-            tooltips.Dispose();
+            if (updateCharacterPanel)
+            {
+                characterStatusOnSetup.Dispose();
+                tooltips.Dispose();
+            }
+
+            AppDomain.CurrentDomain.FirstChanceException -= HandleException;
         }
 
         private void OnCommand(string command, string args)
@@ -190,14 +266,13 @@ namespace RPToolkit
             PluginLog.Information(command);
             switch (command)
             {
+                case "/immersiveconfig":
+                    DrawConfigUI();
+                    break;
                 case "/checkweather":
                     PluginLog.Information($"Weather is currently: {*currentWeather}");
                     PluginLog.Information($"Named weather shows: {weathers[*currentWeather]}");
                     CheckWeather();
-                    break;
-                case "/rainwindow":
-                    // in response to the slash command, just display our main ui
-                    WindowSystem.GetWindow("No Rain Prompt").IsOpen = true;
                     break;
                 case "/umbrella":
                     ChatHelper.SendChatMessage("/fashion \"Prim Dot Parasol\"");
@@ -205,6 +280,9 @@ namespace RPToolkit
                 case "/pickpocket":
                     Random rnd = new Random();
                     ChatHelper.SendChatMessage($"/emote pickpockets <t> for {String.Format("{0:n0}", rnd.Next(Configuration.minPickpocketAmt,Configuration.maxPickpocketAmt))}.");
+                    break;
+                case "/suggestion":
+                    WindowSystem.GetWindow("Temperature Suggestion Window").IsOpen = true;
                     break;
                 default:
                     break;
@@ -236,23 +314,24 @@ namespace RPToolkit
             
             //PluginLog.Information($"{calcHours.ToString()} - {Climates.GetTemperature(this.clientState.TerritoryType, calcHours).ToString()}");
 
-            if (Configuration.enableRainPopup && !Condition[ConditionFlag.OccupiedInCutSceneEvent] && !Condition[ConditionFlag.WatchingCutscene78]) {
+            //if (Configuration.enableRainPopup...
+            if (!Condition[ConditionFlag.OccupiedInCutSceneEvent] && !Condition[ConditionFlag.WatchingCutscene78] && !Condition[ConditionFlag.BetweenAreas] && !Condition[ConditionFlag.BetweenAreas51]) {
                 if (*currentWeather != prevWeather)
                 {
                     if (rainWeathers.Contains(*currentWeather) && !rainWeathers.Contains(prevWeather) && !Condition[ConditionFlag.UsingParasol])
                     {
                         ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Configuration.temperatureChatType, "Weather");
-                        WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
-                        WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
+                        //WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
+                        //WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
                     }
                     else if (!rainWeathers.Contains(*currentWeather) && rainWeathers.Contains(prevWeather))
                     {
                         ChatHelper.Echo("The rain begins to clear.", Configuration.temperatureChatType, "Weather");
-                        WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
+                        /*WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
                         if (Condition[ConditionFlag.UsingParasol])
                         {
                             WindowSystem.GetWindow("No Rain Prompt").IsOpen = true;
-                        }
+                        }*/
                     }
 
                     prevWeather = *currentWeather;
@@ -267,61 +346,70 @@ namespace RPToolkit
 
         public void UpdateTemps()
         {
-            if (Configuration.enableTemperatureMessages && Climates.zoneTemperatures.ContainsKey(this.clientState.TerritoryType))
+            if (!Condition[ConditionFlag.BetweenAreas] && !Condition[ConditionFlag.BetweenAreas51])
             {
-                secPassed++;
-                if (secPassed >= secUntilDivergenceUpdate)
+                if (Configuration.enableTemperatureMessages && Climates.zoneTemperatures.ContainsKey(this.clientState.TerritoryType) && (Climates.zoneTemperatures[this.clientState.TerritoryType].low != 0 && Climates.zoneTemperatures[this.clientState.TerritoryType].high != 0))
                 {
-                    secPassed = 0;
-                    Random rnd = new Random();
-                    int temperatureAdjustment = temperatureDivergence + rnd.Next(-1, 2);
-                    if (temperatureAdjustment >= -temperatureDivergenceLimit && temperatureAdjustment <= temperatureDivergenceLimit)
+                    secPassed++;
+                    if (secPassed >= secUntilDivergenceUpdate)
                     {
-                        temperatureDivergence = temperatureAdjustment;
-                    }
-                }
-
-                int hours = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Hour;
-                int minutes = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Minute;
-                int seconds = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Second;
-                float calcHours = hours + ((float)minutes / 60) + ((float)seconds / 60 / 60);
-                currentTemp =
-                    Climates.GetTemperature(this.clientState.TerritoryType, calcHours) +
-                    (Climates.weatherTemperatures.ContainsKey(*currentWeather) ?
-                        Climates.weatherTemperatures[*currentWeather]
-                    :
-                        Climates.weatherTemperatures[0]
-                    ) +
-                    temperatureDivergence;
-
-                PluginLog.Information($"{currentTemp.ToString()} ({Climates.GetTemperature(this.clientState.TerritoryType, calcHours)}, {temperatureDivergence}, {(Climates.weatherTemperatures.ContainsKey(*currentWeather) ? Climates.weatherTemperatures[*currentWeather] : Climates.weatherTemperatures[0])})");
-
-                int newStage = currentTemperatureStage;
-                foreach (KeyValuePair<int, Climates.TemperatureDescription> tempStages in Climates.temperatureStages)
-                {
-                    if (currentTemp < currentTemperatureStage)
-                    {
-                        if (currentTemp >= tempStages.Key && tempStages.Key < currentTemperatureStage)
+                        secPassed = 0;
+                        Random rnd = new Random();
+                        int temperatureAdjustment = temperatureDivergence + rnd.Next(-1, 2);
+                        if (temperatureAdjustment >= -temperatureDivergenceLimit && temperatureAdjustment <= temperatureDivergenceLimit)
                         {
-                            newStage = tempStages.Key;
+                            temperatureDivergence = temperatureAdjustment;
                         }
                     }
-                    else if (currentTemp > currentTemperatureStage)
+
+                    int hours = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Hour;
+                    int minutes = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Minute;
+                    int seconds = DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Second;
+                    float calcHours = hours + ((float)minutes / 60) + ((float)seconds / 60 / 60);
+                    currentTemp =
+                        Climates.GetTemperature(this.clientState.TerritoryType, calcHours) +
+                        (Climates.weatherTemperatures.ContainsKey(*currentWeather) ?
+                            Climates.weatherTemperatures[*currentWeather]
+                        :
+                            Climates.weatherTemperatures[0]
+                        ) +
+                        temperatureDivergence;
+
+                    PluginLog.Information($"{currentTemp.ToString()} ({Climates.GetTemperature(this.clientState.TerritoryType, calcHours)}, {temperatureDivergence}, {(Climates.weatherTemperatures.ContainsKey(*currentWeather) ? Climates.weatherTemperatures[*currentWeather] : Climates.weatherTemperatures[0])})");
+
+                    int newStage = currentTemperatureStage;
+                    foreach (KeyValuePair<int, Climates.TemperatureDescription> tempStages in Climates.temperatureStages)
                     {
-                        if (tempStages.Key > currentTemperatureStage && currentTemp >= tempStages.Key)
+                        if (currentTemp < currentTemperatureStage)
                         {
-                            newStage = tempStages.Key;
+                            if (currentTemp >= tempStages.Key && tempStages.Key < currentTemperatureStage)
+                            {
+                                newStage = tempStages.Key;
+                            }
+                        }
+                        else if (currentTemp > currentTemperatureStage)
+                        {
+                            if (tempStages.Key > currentTemperatureStage && currentTemp >= tempStages.Key)
+                            {
+                                newStage = tempStages.Key;
+                            }
                         }
                     }
+                    if (currentTemperatureStage != newStage)
+                    {
+                        if (newStage < currentTemperatureStage)
+                            ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc, Configuration.temperatureChatType, "Temperature");
+                        else if (newStage > currentTemperatureStage)
+                            ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc, Configuration.temperatureChatType, "Temperature");
+                        currentTemperatureStage = newStage;
+                    }
                 }
-                if (currentTemperatureStage != newStage)
+                else
                 {
-                    if (newStage < currentTemperatureStage)
-                        ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc, Configuration.temperatureChatType, "Temperature");
-                    else if (newStage > currentTemperatureStage)
-                        ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc, Configuration.temperatureChatType, "Temperature");
-                    currentTemperatureStage = newStage;
+                    if (currentZone != this.clientState.TerritoryType)
+                        WindowSystem.GetWindow("Temperature Suggestion Window").IsOpen = true;
                 }
+                currentZone = this.clientState.TerritoryType;
             }
         }
 
@@ -339,6 +427,79 @@ namespace RPToolkit
         private void GetGameDimensions(Object source, System.Timers.ElapsedEventArgs e)
         {
             GetGameDimensions();
+        }
+        private void PeriodicApiStateCheck(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            glamourerAvailable = CheckGlamourerApi();
+        }
+        private bool CheckGlamourerApi()
+        {
+            bool apiAvailable = false;
+            try
+            {
+                apiAvailable = _glamourerApiVersion.InvokeFunc() >= 0;
+                return apiAvailable;
+            }
+            catch
+            {
+                return apiAvailable;
+            }
+        }
+
+        public string GetGlamourerCurrentEquipment()
+        {
+            if (glamourerAvailable && this.clientState.LocalPlayer is Character c)
+                return _glamourerGetAllCustomization!.InvokeFunc(c);
+            else return "";
+        }
+
+        public void ApplyGlamourerEquipment(string customizationString)
+        {
+            if (glamourerAvailable && this.clientState.LocalPlayer is Character c)
+                _glamourerApplyOnlyEquipment!.InvokeAction(customizationString, c);
+        }
+
+        private void PeriodicOutfitChangeCheck(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            if (glamourerAvailable)
+            {
+                foreach (var outfitData in this.Configuration.climateOutfitData)
+                {
+                    if (this.clientState.LocalPlayer?.ClassJob.Id == outfitData.jobID)
+                    {
+                        bool correctWeather = false;
+                        if ((outfitData.climateConditions & (int)ClimateOutfitData.ClimateConditions.Only_When_Raining) == (int)ClimateOutfitData.ClimateConditions.Only_When_Raining)
+                        {
+                            if (rainWeathers.Contains(*currentWeather))
+                            {
+                                correctWeather = true;
+                            }
+                        }
+                        else
+                            correctWeather = true;
+
+                        if (correctWeather)
+                        {
+                            //PluginLog.Information(currentTemperatureStage.ToString());
+                            //PluginLog.Information(Climates.temperatureStages.ElementAt(0).Key);
+                            for (int i = 1; i < Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)).Length; i++)
+                            {
+                                int value = ((int[])Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)))[i];
+                                if ((outfitData.climateConditions & value) == value && currentTemperatureStage == Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key)
+                                {
+                                    PluginLog.Information(i + ": " + Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value) + " (" + Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key + ")");
+                                    if (currentCustomizationString != outfitData.customizationString)
+                                    {
+                                        ApplyGlamourerEquipment(outfitData.customizationString);
+                                        currentCustomizationString = outfitData.customizationString;
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
 

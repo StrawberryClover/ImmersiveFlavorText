@@ -3,6 +3,7 @@ using Dalamud.Game.Text;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
 
 namespace RPToolkit
 {
@@ -11,13 +12,15 @@ namespace RPToolkit
     {
         public int Version { get; set; } = 1;
 
-        public bool enableRainPopup { get; set; } = true;
-        public int SelectedParasolID { get; set; } = 58001;
+        //public int SelectedParasolID { get; set; } = 58001;
         public bool enableTemperatureMessages { get; set; } = true;
         public XivChatType temperatureChatType = XivChatType.Echo;
+        public bool showTemperatureSuggestionPopup = true;
 
         public int minPickpocketAmt = 1;
         public int maxPickpocketAmt = 20000;
+
+        public List<ClimateOutfitData> climateOutfitData = new List<ClimateOutfitData>();
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]
