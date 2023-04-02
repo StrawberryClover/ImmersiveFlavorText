@@ -86,7 +86,7 @@ namespace RPToolkit.Windows
             {
                 if (highTemperature != "" && lowTemperature != "")
                 {
-                    NetHelper.SubmitDataAsync(Plugin.clientState.LocalPlayer?.Name.ToString(), Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType).PlaceName.Value.Name.RawString, highTemperature, lowTemperature);
+                    NetHelper.SubmitDataAsync(Plugin.clientState.TerritoryType, Plugin.clientState.LocalPlayer?.Name.ToString(), Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType).PlaceName.Value.Name.RawString, highTemperature, lowTemperature);
                     highTemperature = "";
                     lowTemperature = "";
                     weatherAdjustment = "";
