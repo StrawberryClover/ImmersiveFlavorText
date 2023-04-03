@@ -24,7 +24,7 @@ public class ConfigWindow : Window, IDisposable
         this.Size = new Vector2(450, 248);
         this.SizeCondition = ImGuiCond.FirstUseEver;
 
-        this.Configuration = plugin.Configuration;
+        this.Configuration = Plugin.Configuration;
 
 
         var baseJobEnums = (uint[])Enum.GetValues(typeof(ClimateOutfitData.Jobs));
@@ -129,6 +129,14 @@ public class ConfigWindow : Window, IDisposable
         {
             this.Configuration.showTemperatureSuggestionPopup = showTemperatureSuggestionPopup;
             this.Configuration.Save();
+        }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Specifies whether to show suggestion popup");
+            ImGui.Text("window automatically, or if it should instead");
+            ImGui.Text("notify user via chat that no data is available.");
+            ImGui.EndTooltip();
         }
     }
 

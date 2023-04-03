@@ -1,6 +1,10 @@
 using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using RPToolkit.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +21,12 @@ namespace RPToolkit
     internal unsafe class ChatHelper : IDisposable
     {
         #region Singleton
-        private ChatHelper()
-        {
-            _chatModulePtr = Plugin.SigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 20 48 8B FA 48 8B D9 45 84 C9");
-            _inputTextActive = *(IntPtr*)((IntPtr)AtkStage.GetSingleton() + 0x28) + 0x188E;
-        }
 
         public static ChatHelper Instance { get; private set; } = null!;
-        public static void Initialize() { Instance = new ChatHelper(); PluginLog.Information("ChatHelper Initialized"); }
-
+        public static void Initialize() {
+            Instance = new ChatHelper();
+            PluginLog.Information("ChatHelper Initialized");
+        }
 
         ~ChatHelper()
         {
@@ -52,9 +53,30 @@ namespace RPToolkit
         private IntPtr _chatModulePtr;
         private IntPtr _inputTextActive = IntPtr.Zero;
 
+        private static DalamudLinkPayload chatLinkPayload;
+        private ChatHelper()
+        {
+            _chatModulePtr = Plugin.SigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 20 48 8B FA 48 8B D9 45 84 C9");
+            _inputTextActive = *(IntPtr*)((IntPtr)AtkStage.GetSingleton() + 0x28) + 0x188E;
+
+            chatLinkPayload = Plugin.Singleton.PluginInterface.AddChatLinkHandler(0, OnChatLinkClick);
+        }
+
         public bool IsInputTextActive()
         {
             return _inputTextActive != IntPtr.Zero && *(bool*)_inputTextActive;
+        }
+        private void OnChatLinkClick(uint cmdId, SeString msg)
+        {
+            if (msg.ToString().Contains("suggest some"))
+                Plugin.DrawWindow("Temperature Suggestion Window");
+        }
+
+        public static void SendSuggestionMessage()
+        {
+            var chatMsg = new SeString(new TextPayload("This zone doesn't seem to have any temperature data yet! Would you like to help "), new UIForegroundPayload(710), chatLinkPayload, new TextPayload("[suggest some]"),
+                        new UIForegroundPayload(0), new TextPayload("?"), RawPayload.LinkTerminator);
+            Plugin.chat.PrintChat(new XivChatEntry { Message = chatMsg, Type = Plugin.Configuration.temperatureChatType, Name = "Temperature" });
         }
 
         public static void Echo(string message, XivChatType chatType = XivChatType.Echo, string name = "")
@@ -84,7 +106,7 @@ namespace RPToolkit
             }
 
             // let dalamud process the command first
-            if (Plugin.CommandManager.ProcessCommand(message))
+            if (CommandHandler.commandManager.ProcessCommand(message))
             {
                 return;
             }

@@ -60,13 +60,13 @@ namespace RPToolkit.Windows
             ImGui.Text("Enter high and low temperatures to log:");
             ImGui.PushID("highTempInput");
             ImGui.PushItemWidth(50);
-            if (ImGui.InputText("High Temperature", ref highTemperature, 4, ImGuiInputTextFlags.AllowTabInput))
+            if (ImGui.InputText("High Temperature", ref highTemperature, 9, ImGuiInputTextFlags.AllowTabInput))
             {
 
             }
             ImGui.PopID();
             ImGui.PushID("lowTempInput");
-            if (ImGui.InputText("Low Temperature", ref lowTemperature, 4, ImGuiInputTextFlags.AllowTabInput))
+            if (ImGui.InputText("Low Temperature", ref lowTemperature, 9, ImGuiInputTextFlags.AllowTabInput))
             {
 
             }

@@ -40,10 +40,12 @@ namespace RPToolkit
 
         #region Biome Temperature Variables
         public static ZoneTemperature indoors = new ZoneTemperature(68, 76);
-        public static ZoneTemperature desert = new ZoneTemperature(25, 100);
+        public static ZoneTemperature desert = new ZoneTemperature(66, 100); //25 at night? idk lmao
         public static ZoneTemperature coastal = new ZoneTemperature(68, 86);
         public static ZoneTemperature shrubland = new ZoneTemperature(55, 79);
         public static ZoneTemperature tundra = new ZoneTemperature(2, 27);
+        public static ZoneTemperature temperateForest = new ZoneTemperature(53, 85);
+        public static ZoneTemperature rainForest = new ZoneTemperature(75, 88);
         #endregion
 
         public struct ZoneTemperature
@@ -73,8 +75,8 @@ namespace RPToolkit
             {129, coastal}, //Limsa (Lower)
             {130, desert}, //Ul dah - Steps of Nald
             {131, desert}, //Ul dah - Steps of Thal
-            {132, shrubland}, //New Gridania
-            {133, shrubland}, //Old Gridania
+            {132, temperateForest}, //New Gridania
+            {133, temperateForest}, //Old Gridania
             {134, coastal}, //Middle La Noscea
             {135, coastal}, //Lower La Noscea
             {137, coastal}, //Eastern La Noscea
@@ -86,16 +88,16 @@ namespace RPToolkit
             {145, desert}, //Eastern Thanalan
             {146, desert}, //Southern Thanalan
             {147, desert}, //Northern Thanalan
-            {148, shrubland}, //Central Shroud
-            {150, new ZoneTemperature(30, 50)}, //[Dungeon]KeepersOfTheLake
-            {152, shrubland}, //East Shroud
-            {153, shrubland}, //South Shroud
-            {154, shrubland}, //North Shroud
+            {148, temperateForest}, //Central Shroud
+            {150, new ZoneTemperature(30, 50)}, //[Dungeon]KeepersOfTheLake (Old?)
+            {152, temperateForest}, //East Shroud
+            {153, temperateForest}, //South Shroud
+            {154, temperateForest}, //North Shroud
             {155, tundra}, //Coerthas
             {156, new ZoneTemperature(30, 50)}, //Mor Dhona
-            {157, new ZoneTemperature(0, 0)}, //[Dungeon]Sastasha
-            {158, new ZoneTemperature(0, 0)}, //[Dungeon]Brayflox
-            {159, new ZoneTemperature(0, 0)}, //[Dungeon]WanderersPalace
+            {157, new ZoneTemperature(77, 77)}, //[Dungeon]Sastasha (Old?)
+            {158, coastal}, //[Dungeon]Brayflox (Old?)
+            {159, coastal}, //[Dungeon]WanderersPalace
             {160, new ZoneTemperature(0, 0)}, //[Dungeon]PharosSirius
             {161, new ZoneTemperature(0, 0)}, //[Dungeon]Copperbell
             {162, new ZoneTemperature(0, 0)}, //[Dungeon]Halatali
@@ -130,10 +132,12 @@ namespace RPToolkit
             {281, new ZoneTemperature(0, 0)}, //[Trial]Leviathan
             {286, new ZoneTemperature(0, 0)}, //ImOnABoat
             {288, new ZoneTemperature(0, 0)}, //ImOnABoat
+            {292, new ZoneTemperature(100, 113)}, //[Trial]Bowl of Embers
             {331, new ZoneTemperature(0, 0)}, //Garuda_Entrance
             {332, new ZoneTemperature(0, 0)}, //[Trial]CapeWestwind
             {336, coastal}, //Wolves Den
             {337, coastal}, //Wolves Den
+            {340, temperateForest}, //Lavender Beds
             {341, new ZoneTemperature(60, 91)}, //The Goblet
             {345, indoors}, //Private Cottage - The Goblet
             {349, new ZoneTemperature(0, 0)}, //[Dungeon]CopperbellHM
@@ -181,12 +185,27 @@ namespace RPToolkit
             {620, new ZoneTemperature(0, 0)}, //The Peaks
             {621, new ZoneTemperature(0, 0)}, //The Lochs
             {622, new ZoneTemperature(0, 0)}, //The Azim Steppe
+            {626, coastal}, //[Dungeon]The Sirensong Sea
             {628, new ZoneTemperature(0, 0)}, //Kugane
             {635, new ZoneTemperature(0, 0)}, //Rhalgrs Reach
             {639, new ZoneTemperature(0, 0)}, //Ruby Bazaar Offices
             {680, new ZoneTemperature(0, 0)}, //ImOnABoatAgain
             {681, new ZoneTemperature(0, 0)}, //The House of the Fierce
-            {683, new ZoneTemperature(0, 0)} //First Alter of Djanan
+            {683, new ZoneTemperature(0, 0)}, //First Alter of Djanan
+            {813, temperateForest}, //Lakeland
+            {815, desert}, //Amh Araeng
+            {816, shrubland}, //Il Mheg
+            {817, rainForest}, //Rak'tika Greatwood
+            {818, new ZoneTemperature(30, 38)}, //The Tempest
+            {819, temperateForest}, //The Crystarium
+            {957, desert}, //Thavnair
+            {963, desert}, //Radz-at-Han
+            {956, indoors}, //Labyrinthos
+            {958, tundra}, //Garlemald
+            {959, new ZoneTemperature(63, 63)}, //Mare Lamentorum
+            {1036, new ZoneTemperature(77, 77)}, //[Dungeon]Sastasha (New?)
+            {1041, coastal}, //[Dungeon]Brayflox (New?)
+            {1063, new ZoneTemperature(30, 50)}, //[Dungeon]KeepersOfTheLake (New?)
         };
 
         /// <summary>
