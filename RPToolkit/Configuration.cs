@@ -15,6 +15,7 @@ namespace RPToolkit
         //public int SelectedParasolID { get; set; } = 58001;
         public bool enableTemperatureMessages { get; set; } = true;
         public XivChatType temperatureChatType = XivChatType.Echo;
+        public bool enableShade = true;
         public bool showTemperatureSuggestionPopup = false;
 
         public int minPickpocketAmt = 1;

@@ -25,7 +25,7 @@ namespace RPToolkit.Windows
         Vector4 errorColor = new Vector4(1, 0, 0, 1);
 
         public TempSuggestionWindow(Plugin plugin) : base(
-        "Temperature Suggestion Window", ImGuiWindowFlags.NoScrollWithMouse)
+        "Temperature Suggestion Window", ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar)
         {
             this.SizeConstraints = new WindowSizeConstraints
             {
@@ -86,7 +86,20 @@ namespace RPToolkit.Windows
             {
                 if (highTemperature != "" && lowTemperature != "")
                 {
-                    NetHelper.SubmitDataAsync(Plugin.clientState.TerritoryType, Plugin.clientState.LocalPlayer?.Name.ToString(), Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType).PlaceName.Value.Name.RawString, highTemperature, lowTemperature);
+                    unsafe
+                    {
+                        _ = NetHelper.SubmitDataAsync(
+                            zoneID: Plugin.clientState.TerritoryType,
+                            zoneName: Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType)!.PlaceName.Value!.Name.RawString,
+                            areaID: Plugin.AreaInfo->AreaPlaceNameID,
+                            areaName: Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID)!.NameNoArticle!,
+                            subAreaID: Plugin.AreaInfo->SubAreaPlaceNameID,
+                            subAreaName: Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->SubAreaPlaceNameID)!.NameNoArticle!,
+                            playerName: Plugin.clientState.LocalPlayer?.Name.ToString(),
+                            highTempSuggestion: highTemperature,
+                            lowTempSuggestion: lowTemperature
+                        );
+                    }
                     highTemperature = "";
                     lowTemperature = "";
                     weatherAdjustment = "";

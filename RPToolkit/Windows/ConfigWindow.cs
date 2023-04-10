@@ -122,6 +122,13 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.EndCombo();
         }
+        var enableShade = this.Configuration.enableShade;
+        if (ImGui.Checkbox("(EXPERIMENTAL) Temperature is cooler in shadows", ref enableShade))
+        {
+            this.Configuration.enableShade = enableShade;
+
+            this.Configuration.Save();
+        }
         ImGui.Spacing();
         ImGui.Spacing();
         var showTemperatureSuggestionPopup = this.Configuration.showTemperatureSuggestionPopup;

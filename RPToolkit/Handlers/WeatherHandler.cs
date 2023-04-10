@@ -47,7 +47,7 @@ namespace RPToolkit.Handlers
             //PluginLog.Information($"{calcHours.ToString()} - {Climates.GetTemperature(this.clientState.TerritoryType, calcHours).ToString()}");
 
             //if (Configuration.enableRainPopup...
-            if (!Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] && !Plugin.Condition[ConditionFlag.WatchingCutscene78] && !Plugin.Condition[ConditionFlag.BetweenAreas] && !Plugin.Condition[ConditionFlag.BetweenAreas51])
+            if (!Plugin.Singleton.IsPlayerOccupied())
             {
                 if (*currentWeather != prevWeather)
                 {

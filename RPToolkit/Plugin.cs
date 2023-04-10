@@ -46,6 +46,14 @@ using Newtonsoft.Json.Linq;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using RPToolkit.Handlers;
 using RPToolkit.Helpers;
+using Lumina.Extensions;
+using FFXIVClientStructs.FFXIV.Common.Math;
+using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
+using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
+using System.Drawing;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace RPToolkit
 {
@@ -63,14 +71,14 @@ namespace RPToolkit
         public static ChatGui chat { get; private set; } = null!;
         public static UiBuilder UiBuilder { get; private set; } = null!;
 
-        private readonly ObjectTable _objectTable;
+        public readonly ObjectTable _objectTable;
         private readonly ICallGateSubscriber<int> _glamourerApiVersion;
         private readonly ICallGateSubscriber<string, GameObject?, object>? _glamourerApplyOnlyEquipment;
         private readonly ICallGateSubscriber<GameObject?, string>? _glamourerGetAllCustomization;
         private string currentCustomizationString;
         public bool glamourerAvailable { get; private set; }
 
-        private bool updateCharacterPanel = false;
+        public static TerritoryInfo* AreaInfo => TerritoryInfo.Instance();
 
         public static Dictionary<int, string> parasols { get; private set; } = new Dictionary<int, string>{
             {58001, "Parasol"},
@@ -99,6 +107,7 @@ namespace RPToolkit
         public Configuration _configuration { get; init; }
         public static Configuration Configuration { get { return Plugin.Singleton._configuration; } private set { } }
         public static WindowSystem WindowSystem = new("RPToolkit");
+        
 
         // I frickin suck at remembering to write comments on personal projects
         // so to anyone reading through this, good luck soldier and god speed
@@ -132,6 +141,7 @@ namespace RPToolkit
             TimeHelper.Initialize(pluginInterface);
             CommandHandler.Initialize(pluginInterface);
             WeatherHandler.Initialize(pluginInterface);
+            CharacterWindowUIHandler.Initialize(pluginInterface);
             #endregion
 
             #region Other Plugin API Initialization
@@ -148,6 +158,7 @@ namespace RPToolkit
             #region Windows Initialization
             WindowSystem.AddWindow(new ConfigWindow(this));
             WindowSystem.AddWindow(new TempSuggestionWindow(this));
+            WindowSystem.AddWindow(new DebugOverlay(this));
             #endregion
 
             this.PluginInterface.UiBuilder.Draw += DrawUI;
@@ -173,15 +184,46 @@ namespace RPToolkit
             //PluginLog.Information("Map Title: " + Data.GetExcelSheet<TerritoryType>()?.GetRow(this.clientState.TerritoryType).PlaceName.Value.Name.RawString);
             //this.clientState.TerritoryChanged +=
             //NetHelper.SubmitDataAsync(this.clientState.LocalPlayer?.Name.ToString(), Data.GetExcelSheet<TerritoryType>()?.GetRow(this.clientState.TerritoryType).PlaceName.Value.Name.RawString, currentTemp.ToString(), currentTemp.ToString());
+            if (this.clientState.LocalPlayer != null) OnTerritoryChange();
+            this.clientState.TerritoryChanged += OnTerritoryChange;
+            this.clientState.Login += OnTerritoryChange;
 
-
-
-            SignatureHelper.Initialise(this);
-            if (updateCharacterPanel)
+            /*GameObjectArray[] objectArrays =
             {
-                tooltips = new Tooltips();
-                characterStatusOnSetup.Enable();
+                TargetSystem.Instance()->ObjectFilterArray0,
+                TargetSystem.Instance()->ObjectFilterArray1,
+                TargetSystem.Instance()->ObjectFilterArray2,
+                TargetSystem.Instance()->ObjectFilterArray3,
+            };
+            foreach (GameObjectArray goArray in objectArrays)
+            {
+                for (int i = 0; i < goArray.Length; i++)
+                {
+                    var gameObject = goArray[i];
+                    PluginLog.Information(gameObject->GetName()->ToString() + " (" + gameObject->ObjectKind.ToString() + ")");
+                    gameObjectsTest.Add(*gameObject);
+                }
+            }*/
+            //PluginLog.Information(Control.Instance()->LocalPlayer->Character->)
+
+            if (pluginInterface.IsDev)
+            {
+                Condition.ConditionChange += OnConditionChange;
+                //DrawWindow("Debug Overlay");
             }
+        }
+
+        private float GetDistanceToObject(GameObject target)
+        {
+            var distance = Vector3.Distance((Vector3)clientState.LocalPlayer?.Position, target.Position);
+            //distance -= source.HitboxRadius;
+            distance -= target.HitboxRadius;
+            return distance;
+        }
+
+        private void OnConditionChange(ConditionFlag flag, bool value)
+        {
+            PluginLog.Information(flag.ToString() + " " + value.ToString());
         }
 
         private void InitializePeriodicTicks()
@@ -193,6 +235,12 @@ namespace RPToolkit
             tick.Elapsed += GetGameDimensions;
             tick.Elapsed += PeriodicApiStateCheck;
             tick.Elapsed += PeriodicOutfitChangeCheck;
+
+            if (PluginInterface.IsDev)
+            {
+                tick.Elapsed += DebugStuff;
+            }
+
             tick.Start();
         }
 
@@ -224,14 +272,26 @@ namespace RPToolkit
             tick.Dispose();
             WindowSystem.RemoveAllWindows();
             CommandHandler.Dispose();
-
-            if (updateCharacterPanel)
-            {
-                characterStatusOnSetup.Dispose();
-                tooltips.Dispose();
-            }
+            CharacterWindowUIHandler.Dispose();
 
             AppDomain.CurrentDomain.FirstChanceException -= HandleException;
+            this.clientState.TerritoryChanged -= OnTerritoryChange;
+            this.clientState.Login -= OnTerritoryChange;
+            if (PluginInterface.IsDev)
+            {
+                Condition.ConditionChange -= OnConditionChange;
+            }
+        }
+
+        private void DebugStuff(System.Object? source, System.Timers.ElapsedEventArgs e)
+        {
+            PluginLog.Information($"({AreaInfo->AreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->AreaPlaceNameID).NameNoArticle}\" " +
+                $": ({AreaInfo->SubAreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->SubAreaPlaceNameID).NameNoArticle}\"");
+
+            //var wetness = *((byte*)this.clientState.LocalPlayer.Address + 0x1B1F);
+            //*((byte*)this.clientState.LocalPlayer.Address + 0x1B1F) = 36;
+            //var wetness = (int*)(clientState.LocalPlayer.Address + 0x2B0);
+            //PluginLog.Information(wetness->ToString());
         }
 
         private void DrawUI()
@@ -241,7 +301,7 @@ namespace RPToolkit
 
         public void DrawConfigUI()
         {
-            WindowSystem.GetWindow($"{this.Name} Config Window").IsOpen = true;
+            DrawWindow($"{this.Name} Config Window");
         }
 
         public static void DrawWindow(string windowName)
@@ -260,11 +320,33 @@ namespace RPToolkit
             this.gameDimensions = d;
         }
 
-        private void GetGameDimensions(Object? source, System.Timers.ElapsedEventArgs e)
+        private void GetGameDimensions(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
             GetGameDimensions();
         }
-        private void PeriodicApiStateCheck(Object? source, System.Timers.ElapsedEventArgs e)
+
+        private void OnTerritoryChange()
+        {
+            TemperatureHandler.NewZone();
+        }
+        private void OnTerritoryChange(object? sender, ushort e)
+        {
+            OnTerritoryChange();
+        }
+        private void OnTerritoryChange(object? sender, EventArgs e)
+        {
+            OnTerritoryChange();
+        }
+
+        internal bool IsPlayerOccupied()
+        {
+            return (Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+                Condition[ConditionFlag.WatchingCutscene78] ||
+                Condition[ConditionFlag.BetweenAreas] ||
+                Condition[ConditionFlag.BetweenAreas51]);
+        }
+
+        private void PeriodicApiStateCheck(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
             glamourerAvailable = CheckGlamourerApi();
         }
@@ -295,9 +377,9 @@ namespace RPToolkit
                 _glamourerApplyOnlyEquipment!.InvokeAction(customizationString, c);
         }
 
-        private void PeriodicOutfitChangeCheck(Object? source, System.Timers.ElapsedEventArgs e)
+        private void PeriodicOutfitChangeCheck(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
-            if (glamourerAvailable)
+            if (glamourerAvailable && !IsPlayerOccupied() && !Condition[ConditionFlag.Fishing])
             {
                 foreach (var outfitData in Configuration.climateOutfitData)
                 {
@@ -337,215 +419,6 @@ namespace RPToolkit
                     }
                 }
             }
-        }
-
-
-        [Signature("4C 8B DC 55 53 41 56 49 8D 6B A1 48 81 EC F0 00 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 07", DetourName = nameof(CharacterStatusOnSetupDetour))]
-        private readonly Hook<AddonOnSetup> characterStatusOnSetup = null!;
-
-        private unsafe delegate void* AddonOnSetup(AtkUnitBase* atkUnitBase, int a2, void* a3);
-
-        private unsafe void* CharacterStatusOnSetupDetour(AtkUnitBase* atkUnitBase, int a2, void* a3)
-        {
-            var val = characterStatusOnSetup.Original(atkUnitBase, a2, a3);
-            try
-            {
-                CharacterStatusOnSetup(atkUnitBase);
-            }
-            catch (Exception e)
-            {
-                PluginLog.Log(e, "Failed to setup Character Panel");
-            }
-            return val;
-        }
-
-        internal unsafe void CharacterStatusOnSetup(AtkUnitBase* atkUnitBase)
-        {
-            PluginLog.Information("In Character Status On Setup");
-            var uiState = UIState.Instance();
-
-            var attributesPtr = atkUnitBase->UldManager.SearchNodeById(26);
-            var mndNode = attributesPtr->ChildNode;
-
-            var gearProp = atkUnitBase->UldManager.SearchNodeById(80);
-            var avgItemLvlNode = gearProp->ChildNode;
-            //avgItemLvlNode->PrevSiblingNode->ToggleVisibility(false); // header
-
-            /*var _node = gearProp;
-            PluginLog.Information(_node.ChildCount.ToString());
-            var node = _node.ChildNode->PrevSiblingNode->ChildNode;
-            if (node != null)
-            {
-                var textNode = node->GetAsAtkTextNode();
-                PluginLog.Information($"{(textNode != null ? textNode->NodeText.ToString() : "")} - {node->GetType()} [{node->ChildCount.ToString()}]");
-            }
-            else
-            {
-                PluginLog.Information("null");
-            }*/
-            //PluginLog.Information($"{avgItemLvlNode->PrevSiblingNode->ParentNode[0].ChildNode->ToString()}, {(textNode != null ? textNode->NodeText : "null")}");
-            /*expectedDamagePtr = AddStatRow((AtkComponentNode*)avgItemLvlNode, Localization.Panel_Damage_per_100_Potency, true);
-            SetTooltip(expectedDamagePtr, Tooltips.Entry.ExpectedDamage);*/
-
-            /*for (var i = 0; i < atkUnitBase->UldManager.NodeListCount; i++)
-            {
-                if (atkUnitBase->UldManager.NodeList[i] == null) continue;
-                var node = atkUnitBase->UldManager.NodeList[i];
-                var textNode = node->GetAsAtkTextNode();
-                PluginLog.Information($"{i}, {(textNode != null ? textNode->NodeText.ToString() : "")} - {node->GetType()} [{node->ChildCount.ToString()}]");
-                for (var b = 0; b < node->ChildCount; b++)
-                {
-                    var subNode = node[i];
-                    var subTextNode = subNode.GetAsAtkTextNode();
-                    PluginLog.Information($"    {b}, {(subTextNode != null ? subTextNode->NodeText.ToString() : "")} [{subNode.ChildCount.ToString()}]");
-                }
-            }*/
-
-            TemperatureHandler.UpdateTemps();
-            int hours = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Hour;
-            int minutes = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Minute;
-            int seconds = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Second;
-            float calcHours = hours + ((float)minutes / 60) + ((float)seconds / 60 / 60);
-            tooltips.ReloadTemperatureTooltip(Climates.GetTemperature(clientState.TerritoryType, calcHours) + TemperatureHandler.temperatureDivergence, Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : Climates.weatherTemperatures[0]);
-
-            var testRow = AddStatRow((AtkComponentNode*)avgItemLvlNode, "Temperature", false);
-            var test2Row = AddStatRow((AtkComponentNode*)avgItemLvlNode, "Temperature2");
-            testRow->SetText(TemperatureHandler.currentTemp.ToString() + "℉");
-            test2Row->SetText(TemperatureHandler.currentTemp.ToString() + "C");
-            SetTooltip((AtkComponentNode*)avgItemLvlNode, Tooltips.Entry.Hunger);
-            SetTooltip(testRow, Tooltips.Entry.Temperature);
-            SetTooltip(test2Row, Tooltips.Entry.Temperature);
-
-
-            // Attempt to make new category (so far attempts have been unsuccessful)
-            var size = sizeof(AtkComponentNode);
-            var allocation = MemoryHelper.GameAllocateUi((ulong)size);
-            var bytes = new byte[size];
-            Marshal.Copy(new IntPtr(gearProp), bytes, 0, bytes.Length);
-            Marshal.Copy(bytes, 0, allocation, bytes.Length);
-
-            var newNode = (AtkResNode*)allocation;
-            newNode->ParentNode = null;
-            newNode->ChildNode = null;
-            newNode->ChildCount = 0;
-            newNode->PrevSiblingNode = null;
-            newNode->NextSiblingNode = null;
-            test2Row->AtkResNode.ParentNode = newNode;
-            //var testRow3 = AddStatRow((AtkComponentNode*)newNode->ChildNode, "Temperature", false);
-
-            var characterStatusPtr = (IntPtr)atkUnitBase;
-
-            //UpdateCharacterPanelForJob(job, lvl);
-        }
-
-        private unsafe void SetTooltip(AtkComponentNode* parentNode, Tooltips.Entry entry)
-        {
-            if (parentNode == null)
-                return;
-            var collisionNode = parentNode->Component->UldManager.RootNode;
-            if (collisionNode == null)
-                return;
-
-            var ttMgr = AtkStage.GetSingleton()->TooltipManager;
-            var ttMsg = Find(ttMgr.TooltipMap.Head->Parent, collisionNode).Value;
-            ttMsg->AtkTooltipArgs.Text = (byte*)tooltips[entry];
-        }
-
-        private unsafe void SetTooltip(AtkTextNode* node, Tooltips.Entry entry)
-        {
-            SetTooltip((AtkComponentNode*)node->AtkResNode.ParentNode, entry);
-        }
-
-        private unsafe AtkTextNode* AddStatRow(AtkComponentNode* parentNode, string label, bool hideOriginal = false)
-        {
-            ExpandNodeList(parentNode, 2);
-            var collisionNode = parentNode->Component->UldManager.RootNode;
-            if (!hideOriginal)
-            {
-                parentNode->AtkResNode.Height += 20;
-                collisionNode->Height += 20;
-            }
-
-            var numberNode = (AtkTextNode*)collisionNode->PrevSiblingNode;
-            var labelNode = (AtkTextNode*)numberNode->AtkResNode.PrevSiblingNode;
-            var newNumberNode = CloneNode(numberNode);
-            var prevSiblingNode = labelNode->AtkResNode.PrevSiblingNode;
-            labelNode->AtkResNode.PrevSiblingNode = (AtkResNode*)newNumberNode;
-            newNumberNode->AtkResNode.ParentNode = (AtkResNode*)parentNode;
-            newNumberNode->AtkResNode.NextSiblingNode = (AtkResNode*)labelNode;
-            newNumberNode->AtkResNode.Y = parentNode->AtkResNode.Height - 24;
-            newNumberNode->TextColor = new ByteColor { A = 0xFF, R = 0xA0, G = 0xA0, B = 0xA0 };
-            newNumberNode->NodeText.StringPtr = (byte*)MemoryHelper.GameAllocateUi((ulong)newNumberNode->NodeText.BufSize);
-            parentNode->Component->UldManager.NodeList[parentNode->Component->UldManager.NodeListCount++] = (AtkResNode*)newNumberNode;
-            var newLabelNode = CloneNode(labelNode);
-            newNumberNode->AtkResNode.PrevSiblingNode = (AtkResNode*)newLabelNode;
-            newLabelNode->AtkResNode.ParentNode = (AtkResNode*)parentNode;
-            newLabelNode->AtkResNode.PrevSiblingNode = prevSiblingNode;
-            newLabelNode->AtkResNode.NextSiblingNode = (AtkResNode*)newNumberNode;
-            newLabelNode->AtkResNode.Y = parentNode->AtkResNode.Height - 24;
-            newLabelNode->TextColor = new ByteColor { A = 0xFF, R = 0xA0, G = 0xA0, B = 0xA0 };
-            newLabelNode->NodeText.StringPtr = (byte*)MemoryHelper.GameAllocateUi((ulong)newLabelNode->NodeText.BufSize);
-            newLabelNode->SetText(label);
-            parentNode->Component->UldManager.NodeList[parentNode->Component->UldManager.NodeListCount++] = (AtkResNode*)newLabelNode;
-            if (hideOriginal)
-            {
-                labelNode->AtkResNode.ToggleVisibility(false);
-                numberNode->TextColor.A = 0; // toggle visibility doesn't work since it's constantly updated by the game
-            }
-
-            return newNumberNode;
-        }
-
-        private unsafe void ExpandNodeList(AtkComponentNode* componentNode, ushort addSize)
-        {
-            var originalList = componentNode->Component->UldManager.NodeList;
-            var originalSize = componentNode->Component->UldManager.NodeListCount;
-            var newSize = (ushort)(componentNode->Component->UldManager.NodeListCount + addSize);
-            var oldListPtr = new IntPtr(originalList);
-            var newListPtr = MemoryHelper.GameAllocateUi((ulong)((newSize + 1) * 8));
-            var clone = new IntPtr[originalSize];
-            Marshal.Copy(oldListPtr, clone, 0, originalSize);
-            Marshal.Copy(clone, 0, newListPtr, originalSize);
-            componentNode->Component->UldManager.NodeList = (AtkResNode**)newListPtr;
-        }
-
-        private static unsafe AtkTextNode* CloneNode(AtkTextNode* original)
-        {
-            var size = sizeof(AtkTextNode);
-            var allocation = MemoryHelper.GameAllocateUi((ulong)size);
-            var bytes = new byte[size];
-            Marshal.Copy(new IntPtr(original), bytes, 0, bytes.Length);
-            Marshal.Copy(bytes, 0, allocation, bytes.Length);
-
-            var newNode = (AtkResNode*)allocation;
-            newNode->ParentNode = null;
-            newNode->ChildNode = null;
-            newNode->ChildCount = 0;
-            newNode->PrevSiblingNode = null;
-            newNode->NextSiblingNode = null;
-            return (AtkTextNode*)newNode;
-        }
-        private readonly Tooltips tooltips;
-        private unsafe TVal Find<TKey, TVal>(StdMap<Pointer<TKey>, TVal>.Node* node, TKey* item) where TKey : unmanaged where TVal : unmanaged
-        {
-            while (!node->IsNil)
-            {
-                if (node->KeyValuePair.Item1.Value < item)
-                {
-                    node = node->Right;
-                    continue;
-                }
-
-                if (node->KeyValuePair.Item1.Value > item)
-                {
-                    node = node->Left;
-                    continue;
-                }
-
-                return node->KeyValuePair.Item2;
-            }
-
-            return default;
         }
     }
 }

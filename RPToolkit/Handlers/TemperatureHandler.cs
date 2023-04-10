@@ -1,13 +1,18 @@
+using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using FFXIVClientStructs.FFXIV.Common.Math;
+using Lumina.Excel.GeneratedSheets;
 using RPToolkit.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Object = System.Object;
 
 namespace RPToolkit.Handlers
 {
@@ -15,14 +20,17 @@ namespace RPToolkit.Handlers
     {
         public static int currentTemperatureStage = 0;
         public static int currentTemp { get; private set; }
+        private static int maxTempChangePerSecond = 1;
         private static int secPassed = 0;
         private static int secUntilDivergenceUpdate = 300;
         private static int temperatureStageShiftSec = 0;
-        private static int temperatureStageShiftCooldown = 120;
+        private static int temperatureStageShiftCooldown = 30;
         public static int temperatureDivergence = 0;
         private static int temperatureDivergenceLimit = 5;
 
         private static int currentZone;
+
+        public static RaycastHit? lastShadedHit = null;
 
         public static void UpdateTemps(Object? source, System.Timers.ElapsedEventArgs e)
         {
@@ -31,9 +39,9 @@ namespace RPToolkit.Handlers
 
         public static void UpdateTemps()
         {
-            if (!Plugin.Condition[ConditionFlag.BetweenAreas] && !Plugin.Condition[ConditionFlag.BetweenAreas51])
+            if (!Plugin.Singleton.IsPlayerOccupied())
             {
-                if (Plugin.Configuration.enableTemperatureMessages && Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].high != 0))
+                if (Plugin.Configuration.enableTemperatureMessages && Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high != 0))
                 {
                     secPassed++;
                     if (secPassed >= secUntilDivergenceUpdate)
@@ -47,21 +55,38 @@ namespace RPToolkit.Handlers
                         }
                     }
 
-                    int hours = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Hour;
-                    int minutes = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Minute;
-                    int seconds = DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Second;
-                    float calcHours = hours + ((float)minutes / 60) + ((float)seconds / 60 / 60);
-                    currentTemp =
-                        Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, calcHours) +
-                        (Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ?
-                            Climates.weatherTemperatures[*WeatherHandler.currentWeather]
-                        :
-                            Climates.weatherTemperatures[0]
-                        ) +
-                        temperatureDivergence;
+                    float calcHours = TimeHelper.GetTotalHours();
+                    int newTemp = Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours);
+                    newTemp += (Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather)
+                        ? Climates.weatherTemperatures[*WeatherHandler.currentWeather]
+                        : 0);
+                    newTemp += temperatureDivergence;
+
+                    int shadeAdjustment = 0;
+                    bool inShade = RaycastSun();
+                    if (Plugin.Configuration.enableShade && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high)
+                    {
+                        if (inShade && newTemp >= 70)
+                        {
+                            float shadePerc = (newTemp - 70) / 40f;
+                            if (shadePerc > 1) shadePerc = 1;
+                            shadeAdjustment = (int)(shadePerc * -15f);
+                        }
+                    }
+                    newTemp += shadeAdjustment;
+
+                    if (currentZone != 0 && Math.Abs(newTemp - currentTemp) > maxTempChangePerSecond)
+                        currentTemp += newTemp < currentTemp ? -maxTempChangePerSecond : maxTempChangePerSecond;
+                    else currentTemp = newTemp;
+
 
                     if (Plugin.Singleton.PluginInterface.IsDev)
-                        PluginLog.Information($"({DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Hour.ToString().PadLeft(2, '0')}:{DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Minute.ToString().PadLeft(2, '0')}:{DateTimeOffset.FromUnixTimeSeconds(*TimeHelper.TrueTime).Second.ToString().PadLeft(2,'0')} ET) Current Temp: {currentTemp.ToString()} [Base: {Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, calcHours)}, Divergence: {temperatureDivergence}, Weather: {(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : Climates.weatherTemperatures[0])}]");
+                        PluginLog.Information($"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2,'0')} ET) " +
+                            $"Current Temp: {currentTemp} " +
+                            $"[B:{Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours)}, " +
+                            $"D:{temperatureDivergence}, " +
+                            $"W:{(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}, " +
+                            $"S:{shadeAdjustment}]");
 
                     int newStage = currentTemperatureStage;
                     foreach (KeyValuePair<int, Climates.TemperatureDescription> tempStages in Climates.temperatureStages)
@@ -102,6 +127,90 @@ namespace RPToolkit.Handlers
                 }
                 currentZone = Plugin.Singleton.clientState.TerritoryType;
             }
+        }
+
+        public static void NewZone()
+        {
+            if (Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high != 0))
+            {
+                if (currentTemp < Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low)
+                    currentTemp = Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low;
+                else if (currentTemp > Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high)
+                    currentTemp = Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high;
+            }
+        }
+
+
+        private static bool RaycastSun()
+        {
+            if (Plugin.Singleton.clientState.LocalPlayer?.Position == null) return false;
+            Vector3[] sunriseToSunsetCurve =
+            {
+                new Vector3(1.375f, 1f, 0.25f),
+                new Vector3(0.46f, 1f, 0.325f),
+                new Vector3(0f, 1f, 0.5f),
+                new Vector3(-0.46f, 1f, 0.325f),
+                new Vector3(-1.375f, 1f, 0.25f)
+            };
+            bool hitSomething = false;
+            float hour = TimeHelper.GetTotalHours();
+            if (hour > 6 && hour < 18) // Day Time
+            {
+                float sunriseHour = 6;
+                float sunsetHour = 18;
+                float hourDifference = sunsetHour - sunriseHour;
+                float hoursAfterSunrise = hour - sunriseHour;
+                float totalPerc = hoursAfterSunrise / hourDifference;
+                float hoursPerStage = hourDifference / (sunriseToSunsetCurve.Length - 1);
+                int stage = (int)MathF.Floor(hoursAfterSunrise / hoursPerStage);
+                float adjustedPerc = hoursAfterSunrise % hoursPerStage / hoursPerStage;
+
+
+                float distance = Vector3.Distance(sunriseToSunsetCurve[stage], sunriseToSunsetCurve[stage + 1]);
+                float scaledDistance = distance * adjustedPerc;
+                var difference = (sunriseToSunsetCurve[stage + 1] - sunriseToSunsetCurve[stage]).Normalized * scaledDistance;
+                var direction = (sunriseToSunsetCurve[stage] + difference);
+
+                //PluginLog.Information($"Stage: {stage}, Perc: {adjustedPerc}, V3A: {sunriseToSunsetCurve[stage]}, V3B: {sunriseToSunsetCurve[stage + 1]}, FinalV3: {direction}");
+
+                //direction = lastQuarterDirection;
+                RaycastHit hit;
+
+                //var flags = stackalloc int[] { 0x2000, 0x0000, 0x4000, 0x0000 };
+                // 1 << 0 = Invisible Ceiling?
+                // 1 << 1 = ???
+                // 1 << 2 = Objects, maybe terrain?
+                // 1 << 3 = Some objects?
+                // 1 << 4 = Invisible Ceiling?
+                // 1 << 5 = ???
+                // 1 << 6 = ???
+                // 1 << 12 = Objects in Gridania??
+                // 1 << 13 = Invisible Walls + Everything else?
+                // 1 << 14 = Objects, but not all objects, and maybe terrain?
+                int flags = 0;
+                //flags[2] |= 1 << 0;
+                //flags[2] |= 1 << 4;
+                flags |= 1 << 2;
+                flags |= 1 << 3;
+                flags |= 1 << 12;
+                //flags |= 1 << 13;
+                flags |= 1 << 14;
+                //flags |= 1 << 15;
+                int mask = 1;
+
+
+                BGCollisionModule* CollisionModule = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule;
+                hitSomething = CollisionModule->RaycastEx(&hit, (Vector3)Plugin.Singleton.clientState.LocalPlayer?.Position, direction, 10000, mask, &flags);
+                if (hitSomething)
+                {
+                    lastShadedHit = hit;
+                    //var hitObject = hit.Object;
+                    //PluginLog.Information(hit.Object);
+                }
+            }
+            PluginLog.Information(hitSomething.ToString());
+            if (!hitSomething) lastShadedHit = null;
+            return hitSomething;
         }
     }
 }

@@ -24,5 +24,22 @@ namespace RPToolkit.Helpers
             TimeAsmPtr = Plugin.SigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 30 4C 8B 15") + 0x19;
             Time = (uint*)(TimeAsmPtr + 0x3);
         }
+
+        public static int GetHours()
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Hour;
+        }
+        public static int GetMinutes()
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Minute;
+        }
+        public static int GetSeconds()
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(*TrueTime).Second;
+        }
+        public static float GetTotalHours()
+        {
+            return GetHours() + ((float)GetMinutes() / 60) + ((float)GetSeconds() / 60 / 60);
+        }
     }
 }
