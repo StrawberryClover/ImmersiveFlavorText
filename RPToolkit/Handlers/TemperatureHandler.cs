@@ -208,7 +208,6 @@ namespace RPToolkit.Handlers
                     //PluginLog.Information(hit.Object);
                 }
             }
-            PluginLog.Information(hitSomething.ToString());
             if (!hitSomething) lastShadedHit = null;
             return hitSomething;
         }
