@@ -1,0 +1,71 @@
+{
+    "heatwaveStageIncrease": [
+        "You don't know how much more of this heat you can take, it's unbearable, what you wouldn't do to find something to help cool you off."
+    ],
+    "heatwaveStageDecrease": [
+        "Nobody should see this message."
+    ],
+
+    "veryHotStageIncrease": [
+        "You start to feel a bit hotter now, very hot in fact."
+    ],
+    "veryHotStageDecrease": [
+        "The heat begins to feel more bearable."
+    ],
+
+    "hotStageIncrease": [
+        "You begin to feel hot, it would be nice to have something to help you cool off."
+    ],
+    "hotStageDecrease": [
+        "You take a sigh of relief as things aren't as hot as they were before, but it would be nice to cool off a bit more."
+    ],
+
+    "roomTempStageIncrease": [
+        "It feels like the perfect temperature right now."
+    ],
+    "roomTempStageDecrease": [
+        "It feels like the perfect temperature right now."
+    ],
+
+    "mildStageIncrease": [
+        "You start to feel a bit more warm."
+    ],
+    "mildStageDecrease": [
+        "The temperature seems to be cooling off a bit, things are starting to just feel just slightly warm now."
+    ],
+
+    "lukewarmStageIncrease": [
+        "Things seem to be warming up a bit, now feeling lukewarm to you."
+    ],
+    "lukewarmStageDecrease": [
+        "It starts to feel lukewarm as the temperature cools down."
+    ],
+
+    "chilledStageIncrease": [
+        "The cold is not as bad as before, you begin to feel just a bit chilled now."
+    ],
+    "chilledStageDecrease": [
+        "You start to feel chilly, things are starting to cool off quite a bit now."
+    ],
+
+    "coldStageIncrease": [
+        "You no longer feel so cold. You haven't stopped shivering, but it almost feels bearable now."
+    ],
+    "coldStageDecrease": [
+        "You begin to feel quite cold, and start to shiver."
+    ],
+
+    "veryColdStageIncrease": [
+        "The air seems to lose it's frigid quality to it, but the ice cold bite in the air is not gone. Any chance you get you find yourself warming your hands in your pockets."
+    ],
+    "veryColdStageDecrease": [
+        "You feel like you can't bear the cold anymore, your whole body is shivering uncontrollably. It would be really nice to warm yourself by a campfire right about now."
+    ],
+
+    "frigidIncrease": [
+        "Nobody should see this message."
+    ],
+    "fridigDecrease": [
+        "The air feels absolutely frigid, at this rate you feel like you are going to freeze."
+    ]
+}

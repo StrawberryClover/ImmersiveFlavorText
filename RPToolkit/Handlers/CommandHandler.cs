@@ -3,6 +3,7 @@ using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using RPToolkit.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace RPToolkit.Handlers
             switch (command)
             {
                 case "/immersiveconfig":
-                    Plugin.Singleton.DrawConfigUI();
+                    ConfigWindow.window.IsOpen = true;
                     break;
                 case "/checkweather":
                     unsafe
@@ -63,7 +64,7 @@ namespace RPToolkit.Handlers
                     ChatHelper.SendChatMessage($"/emote pickpockets <t> for {String.Format("{0:n0}", rnd.Next(Plugin.Configuration.minPickpocketAmt, Plugin.Configuration.maxPickpocketAmt))}.");
                     break;
                 case "/suggestion":
-                    DrawWindow("Temperature Suggestion Window");
+                    TempSuggestionWindow.window.IsOpen = true;
                     break;
                 default:
                     break;

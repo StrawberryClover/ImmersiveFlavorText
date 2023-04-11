@@ -5,6 +5,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using RPToolkit.Handlers;
+using RPToolkit.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,7 +70,7 @@ namespace RPToolkit
         private void OnChatLinkClick(uint cmdId, SeString msg)
         {
             if (msg.ToString().Contains("suggest some"))
-                Plugin.DrawWindow("Temperature Suggestion Window");
+                TempSuggestionWindow.window.IsOpen = true;
         }
 
         public static void SendSuggestionMessage()

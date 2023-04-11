@@ -14,6 +14,7 @@ namespace RPToolkit.Windows
 {
     public class TempSuggestionWindow : Window, IDisposable
     {
+        public static Window window;
         private Plugin Plugin;
 
         float windowWidth = 370;
@@ -27,6 +28,7 @@ namespace RPToolkit.Windows
         public TempSuggestionWindow(Plugin plugin) : base(
         "Temperature Suggestion Window", ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar)
         {
+            window = this;
             this.SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(windowWidth, windowHeight),
@@ -95,16 +97,13 @@ namespace RPToolkit.Windows
                             areaName: Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID)!.NameNoArticle!,
                             subAreaID: Plugin.AreaInfo->SubAreaPlaceNameID,
                             subAreaName: Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->SubAreaPlaceNameID)!.NameNoArticle!,
-                            playerName: Plugin.clientState.LocalPlayer?.Name.ToString(),
+                            playerName: Plugin.clientState.LocalPlayer?.Name.ToString().Split(" ")[0],
                             highTempSuggestion: highTemperature,
                             lowTempSuggestion: lowTemperature
                         );
                     }
-                    highTemperature = "";
-                    lowTemperature = "";
-                    weatherAdjustment = "";
-                    errorText = "";
-                    Plugin.WindowSystem.GetWindow("Temperature Suggestion Window").IsOpen = false;
+                    (highTemperature, lowTemperature, weatherAdjustment, errorText) = ("", "", "", "");
+                    IsOpen = false;
                 }
                 else
                 {

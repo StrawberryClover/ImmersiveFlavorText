@@ -1,7 +1,9 @@
 using Dalamud.Logging;
+using RPToolkit.Localizations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,30 +11,20 @@ namespace RPToolkit
 {
     internal class Climates
     {
-        public struct TemperatureDescription
-        {
-            public string increaseDesc;
-            public string decreaseDesc;
-
-            public TemperatureDescription(string increaseDesc, string decreaseDesc)
-            {
-                this.increaseDesc = increaseDesc;
-                this.decreaseDesc = decreaseDesc;
-            }
-        }
+        public delegate string nameTest(string name);
         public static SortedDictionary<int, TemperatureDescription> temperatureStages { get; private set; } = new SortedDictionary<int, TemperatureDescription>
         {
             // Temperature, Stage Increase Description, Stage Decrease Description
-            {100, new TemperatureDescription("You don't know how much more of this heat you can take, it's unbearable, what you wouldn't do to find something to help cool you off.", "Nobody should see this message.") },
-            {90, new TemperatureDescription("You start to feel a bit hotter now, very hot in fact.", "The heat begins to feel more bearable.") },
-            {76, new TemperatureDescription("You begin to feel hot, it would be nice to have something to help you cool off.", "You take a sigh of relief as things aren't as hot as they were before, but it would be nice to cool off a bit more.") },
-            {68, new TemperatureDescription("It feels like the perfect temperature right now.", "It feels like the perfect temperature right now.") },
-            {60, new TemperatureDescription("You start to feel a bit more warm.", "The temperature seems to be cooling off a bit, things are starting to just feel just slightly warm now.") },
-            {50, new TemperatureDescription("Things seem to be warming up a bit, now feeling lukewarm to you.", "It starts to feel lukewarm as the temperature cools down.") },
-            {40, new TemperatureDescription("The cold is not as bad as before, you begin to feel just a bit chilled now.", "You start to feel chilly, things are starting to cool off quite a bit now.") },
-            {25, new TemperatureDescription("You no longer feel so cold. You haven't stopped shivering, but it almost feels bearable now.", "You begin to feel quite cold, and start to shiver.") },
-            {10, new TemperatureDescription("The air seems to lose it's frigid quality to it, but the ice cold bite in the air is not gone. Any chance you get you find yourself warming your hands in your pockets.", "You feel like you can't bear the cold anymore, your whole body is shivering uncontrollably. It would be really nice to warm yourself by a campfire right about now.") },
-            {0, new TemperatureDescription("Nobody should see this message.", "The air feels absolutely frigid, at this rate you feel like you are going to freeze.") }
+            {100, Localization.loadedLocalization.temperatureStages.heatwave},
+            {90, Localization.loadedLocalization.temperatureStages.veryHot },
+            {76, Localization.loadedLocalization.temperatureStages.hot },
+            {68, Localization.loadedLocalization.temperatureStages.roomTemp },
+            {60, Localization.loadedLocalization.temperatureStages.mild },
+            {50, Localization.loadedLocalization.temperatureStages.lukewarm },
+            {40, Localization.loadedLocalization.temperatureStages.chilled },
+            {25, Localization.loadedLocalization.temperatureStages.cold },
+            {10, Localization.loadedLocalization.temperatureStages.veryCold },
+            {0, Localization.loadedLocalization.temperatureStages.frigid }
         };
 
         public static float hottestHour = 15.5f;
@@ -89,7 +81,10 @@ namespace RPToolkit
             // Zone ID, Avg High Temp, Avg Low Temp (Yes, in the end I've decided to use Fahrenheit. I don't feel like using floats.)
             {128, new ZoneTemperature(warmCoastal)}, //Limsa (Upper)
             {129, new ZoneTemperature(warmCoastal)}, //Limsa (Lower)
-            {130, new ZoneTemperature(desert)}, //Ul dah - Steps of Nald
+            {130, new ZoneTemperature(desert,new Dictionary<uint, Temperature>() //Ul dah - Steps of Nald
+            {
+                {615, indoors} //Quicksand
+            })},
             {131, new ZoneTemperature(desert)}, //Ul dah - Steps of Thal
             {132, new ZoneTemperature(temperateForest)}, //New Gridania
             {133, new ZoneTemperature(temperateForest)}, //Old Gridania
@@ -116,7 +111,7 @@ namespace RPToolkit
             {159, new ZoneTemperature(warmCoastal)}, //[Dungeon]WanderersPalace
             {160, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]PharosSirius
             {161, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell
-            {162, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Halatali
+            {162, new ZoneTemperature(indoors)}, //[Dungeon]Halatali
             {163, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]SunkenTemple
             {164, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TamTara
             {166, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Haukke

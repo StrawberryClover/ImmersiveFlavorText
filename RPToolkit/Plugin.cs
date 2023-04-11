@@ -54,6 +54,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using System.Drawing;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using RPToolkit.Localizations;
 
 namespace RPToolkit
 {
@@ -138,6 +139,7 @@ namespace RPToolkit
             #endregion
 
             #region Internal Initialization
+            Localizations.Localization.LoadLocalization();
             TimeHelper.Initialize(pluginInterface);
             CommandHandler.Initialize(pluginInterface);
             WeatherHandler.Initialize(pluginInterface);
@@ -161,8 +163,8 @@ namespace RPToolkit
             WindowSystem.AddWindow(new DebugOverlay(this));
             #endregion
 
-            this.PluginInterface.UiBuilder.Draw += DrawUI;
-            this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+            this.PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+            this.PluginInterface.UiBuilder.OpenConfigUi += () => { ConfigWindow.window.IsOpen = true; };
 
             ChatHelper.Initialize();
 
@@ -204,7 +206,6 @@ namespace RPToolkit
                     gameObjectsTest.Add(*gameObject);
                 }
             }*/
-            //PluginLog.Information(Control.Instance()->LocalPlayer->Character->)
 
             if (pluginInterface.IsDev)
             {
@@ -291,22 +292,13 @@ namespace RPToolkit
             //var wetness = *((byte*)this.clientState.LocalPlayer.Address + 0x1B1F);
             //*((byte*)this.clientState.LocalPlayer.Address + 0x1B1F) = 36;
             //var wetness = (int*)(clientState.LocalPlayer.Address + 0x2B0);
-            //PluginLog.Information(wetness->ToString());
-        }
-
-        private void DrawUI()
-        {
-            WindowSystem.Draw();
-        }
-
-        public void DrawConfigUI()
-        {
-            DrawWindow($"{this.Name} Config Window");
-        }
-
-        public static void DrawWindow(string windowName)
-        {
-            WindowSystem.GetWindow(windowName).IsOpen = true;
+            //PluginLog.Information(wetness.ToString());
+            //PluginLog.Information(Control.Instance()->LocalPlayer->Character.CustomizeData);
+            //var charObject = Control.Instance()->LocalPlayer->Character.GameObject..ToString();
+            //var objectType = charObject.GetObjectType();
+            //PluginLog.Information(charObject);
+            //var baseObject = Convert.ChangeType(charObject, objectType);
+            //PluginLog.Information(objectType.ToString() + ": " + baseObject.ToString());
         }
 
         private void GetGameDimensions()

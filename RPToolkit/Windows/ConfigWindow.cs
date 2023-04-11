@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
@@ -14,6 +15,7 @@ namespace RPToolkit.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
+    public static Window window;
     private Configuration Configuration;
     private List<uint> jobEnums = new List<uint>();
 
@@ -21,6 +23,7 @@ public class ConfigWindow : Window, IDisposable
         $"{plugin.Name} Config Window",
         ImGuiWindowFlags.NoScrollWithMouse)
     {
+        window = this;
         this.Size = new Vector2(450, 248);
         this.SizeCondition = ImGuiCond.FirstUseEver;
 

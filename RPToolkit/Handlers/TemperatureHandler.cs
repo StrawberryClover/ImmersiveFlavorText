@@ -7,6 +7,8 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Lumina.Excel.GeneratedSheets;
 using RPToolkit.Helpers;
+using RPToolkit.Localizations;
+using RPToolkit.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,21 +77,27 @@ namespace RPToolkit.Handlers
                     }
                     newTemp += shadeAdjustment;
 
+                    if (Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving])
+                    {
+                        newTemp -= 11;
+                    }
+
                     if (currentZone != 0 && Math.Abs(newTemp - currentTemp) > maxTempChangePerSecond)
                         currentTemp += newTemp < currentTemp ? -maxTempChangePerSecond : maxTempChangePerSecond;
                     else currentTemp = newTemp;
 
 
                     if (Plugin.Singleton.PluginInterface.IsDev)
-                        PluginLog.Information($"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2,'0')} ET) " +
+                        PluginLog.Information($"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2, '0')} ET) " +
                             $"Current Temp: {currentTemp} " +
                             $"[B:{Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours)}, " +
                             $"D:{temperatureDivergence}, " +
-                            $"W:{(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}, " +
-                            $"S:{shadeAdjustment}]");
+                            $"Weath:{(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}, " +
+                            $"S:{shadeAdjustment}, " +
+                            $"Wet:{((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : 0)}]");
 
                     int newStage = currentTemperatureStage;
-                    foreach (KeyValuePair<int, Climates.TemperatureDescription> tempStages in Climates.temperatureStages)
+                    foreach (KeyValuePair<int, TemperatureDescription> tempStages in Climates.temperatureStages)
                     {
                         if (currentTemp < currentTemperatureStage)
                         {
@@ -121,7 +129,7 @@ namespace RPToolkit.Handlers
                 {
                     if (currentZone != Plugin.Singleton.clientState.TerritoryType)
                         if (Plugin.Configuration.showTemperatureSuggestionPopup)
-                            Plugin.DrawWindow("Temperature Suggestion Window");
+                            TempSuggestionWindow.window.IsOpen = true;
                         else
                             ChatHelper.SendSuggestionMessage();
                 }
@@ -205,7 +213,7 @@ namespace RPToolkit.Handlers
                 {
                     lastShadedHit = hit;
                     //var hitObject = hit.Object;
-                    //PluginLog.Information(hit.Object);
+                    //PluginLog.Information(hit.Object->GetType().ToString());
                 }
             }
             if (!hitSomething) lastShadedHit = null;
