@@ -232,6 +232,10 @@ namespace RPToolkit
             {845, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague
             {858, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague (Extreme)
             {884, new ZoneTemperature(indoors)}, //[Dungeon]The Grand Cosmos
+            {898, new ZoneTemperature(new Temperature(30, 38), new Dictionary<uint, Temperature>() //Anamnesis Anyder
+            {
+                {3461, indoors} //Anamnesis
+            })},
             {957, new ZoneTemperature(rainForest)}, //Thavnair
             {963, new ZoneTemperature(rainForest)}, //Radz-at-Han
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
@@ -257,6 +261,7 @@ namespace RPToolkit
             {
                 {4190, crystal}, //Hydromantic Terraces
             })},
+            {1073, new ZoneTemperature(shrubland)}, //Elysion
             {1077, new ZoneTemperature(crystal)}, //[Instanced]Zero's Domain
             {1089, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Instanced]The Fell Court of Troia
             {
