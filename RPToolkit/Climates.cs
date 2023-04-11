@@ -237,11 +237,15 @@ namespace RPToolkit
                 {3461, indoors} //Anamnesis
             })},
             {957, new ZoneTemperature(rainForest)}, //Thavnair
-            {963, new ZoneTemperature(rainForest)}, //Radz-at-Han
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
             {958, new ZoneTemperature(tundra)}, //Garlemald
             {959, new ZoneTemperature(new Temperature(63, 63))}, //Mare Lamentorum
             {962, new ZoneTemperature(coldCoastal)}, //Old Sharlayan
+            {963, new ZoneTemperature(rainForest, new Dictionary<uint, Temperature>() //Radz-at-Han
+            {
+                {3868, indoors}, //Ruveydah Fibers
+                {3869, indoors} //Artha
+            })},
             {979, new ZoneTemperature(tundra)}, //Empyreum
             {1036, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (New?)
             {1038, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell (New)
@@ -261,8 +265,10 @@ namespace RPToolkit
             {
                 {4190, crystal}, //Hydromantic Terraces
             })},
+            {1071, new ZoneTemperature(crystal)}, //[Trial]Storm's Crown
             {1073, new ZoneTemperature(shrubland)}, //Elysion
             {1077, new ZoneTemperature(crystal)}, //[Instanced]Zero's Domain
+            {1078, new ZoneTemperature(indoors)}, //[Instanced]Meghaduta Guest Chambers
             {1089, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Instanced]The Fell Court of Troia
             {
                 {4190, crystal}, //Hydromantic Terraces
