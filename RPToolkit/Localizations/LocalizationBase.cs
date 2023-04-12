@@ -68,7 +68,7 @@ namespace RPToolkit.Localizations
             if (values.Length > 0)
             {
                 Random rnd = new Random();
-                int index = rnd.Next(0, values.Length - 1);
+                int index = rnd.Next(0, values.Length);
                 return values[index];
             }
             else return null;
@@ -85,5 +85,11 @@ namespace RPToolkit.Localizations
             if (value == null) return null;
             else return new rstring(new string[] { value });
         }
+
+        public static implicit operator string(rstring rs)
+        {
+            return rs.value;
+        }
+        public override string ToString() => value;
     }
 }
