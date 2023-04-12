@@ -42,26 +42,13 @@ namespace RPToolkit.Localizations
     }
     public struct TemperatureDescription
     {
-        public string? increaseDesc { get { return GetRandomDesc(increaseDescArr); } }
-        private string[] increaseDescArr;
-        public string? decreaseDesc { get { return GetRandomDesc(decreaseDescArr); } }
-        private string[] decreaseDescArr;
+        public rstring increaseDesc;
+        public rstring decreaseDesc;
 
-        public TemperatureDescription(string[] increaseDesc, string[] decreaseDesc)
+        public TemperatureDescription(rstring increaseDesc, rstring decreaseDesc)
         {
-            this.increaseDescArr = increaseDesc;
-            this.decreaseDescArr = decreaseDesc;
-        }
-
-        private string? GetRandomDesc(string[] stringArr)
-        {
-            if (stringArr.Length > 0)
-            {
-                Random rnd = new Random();
-                int index = rnd.Next(0, stringArr.Length - 1);
-                return stringArr[index];
-            }
-            else return null;
+            this.increaseDesc = increaseDesc;
+            this.decreaseDesc = decreaseDesc;
         }
     }
 
