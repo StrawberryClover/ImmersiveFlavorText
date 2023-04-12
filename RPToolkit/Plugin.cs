@@ -55,6 +55,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using System.Drawing;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using RPToolkit.Localizations;
+using Localization = RPToolkit.Localizations.Localization;
 
 namespace RPToolkit
 {
