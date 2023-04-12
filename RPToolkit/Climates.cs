@@ -38,7 +38,7 @@ namespace RPToolkit
         public static Temperature shrubland = new Temperature(55, 79);
         public static Temperature tundra = new Temperature(2, 27);
         public static Temperature temperateForest = new Temperature(53, 85);
-        public static Temperature rainForest = new Temperature(75, 88);
+        public static Temperature rainForest = new Temperature(75, 91);
         public static Temperature highAltitude = new Temperature(18, 50); //based on altitude of 3.3k yalms (around 3k meters higher than I measured using Sohm Al, which seemed to be about 800) and using Temperate Forest as average temp
         public static Temperature volcanic = new Temperature(100, 125);
         public static Temperature crystal = new Temperature(30, 55);
