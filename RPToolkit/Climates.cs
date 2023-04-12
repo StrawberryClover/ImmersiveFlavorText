@@ -140,6 +140,7 @@ namespace RPToolkit
             {210, new ZoneTemperature(desert)}, //Ul dah - Heart of the Sworn
             {212, new ZoneTemperature(indoors)}, //Waking Sands
             {250, new ZoneTemperature(warmCoastal)}, //Wolves Den Pier
+            {266, new ZoneTemperature(desert)}, //[Instanced]Eastern Thanalan (BLM Job Quest)
             {281, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Leviathan
             {286, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
             {288, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
