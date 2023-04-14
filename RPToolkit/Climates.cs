@@ -42,6 +42,7 @@ namespace RPToolkit
         public static Temperature highAltitude = new Temperature(18, 50); //based on altitude of 3.3k yalms (around 3k meters higher than I measured using Sohm Al, which seemed to be about 800) and using Temperate Forest as average temp
         public static Temperature volcanic = new Temperature(100, 125);
         public static Temperature crystal = new Temperature(30, 55);
+        public static Temperature oceanFloor = new Temperature(30, 38);
         #endregion
 
         public struct Temperature
@@ -108,7 +109,10 @@ namespace RPToolkit
             {156, new ZoneTemperature(crystal)}, //Mor Dhona
             {157, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (Old?)
             {158, new ZoneTemperature(warmCoastal)}, //[Dungeon]Brayflox (Old?)
-            {159, new ZoneTemperature(warmCoastal)}, //[Dungeon]WanderersPalace
+            {159, new ZoneTemperature(warmCoastal, new Dictionary<uint, Temperature>() //[Dungeon]WanderersPalace
+            {
+                {790, indoors} //Long Hall
+            })},
             {160, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]PharosSirius
             {161, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell
             {162, new ZoneTemperature(indoors)}, //[Dungeon]Halatali
@@ -211,19 +215,23 @@ namespace RPToolkit
             {628, new ZoneTemperature(coldCoastal)}, //Kugane
             {635, new ZoneTemperature(desert)}, //Rhalgrs Reach
             {639, new ZoneTemperature(new Temperature(0, 0))}, //Ruby Bazaar Offices
+            {674, new ZoneTemperature(coldCoastal)}, //(Trial)The Pool of Tribute (Extreme)
             {680, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoatAgain
             {681, new ZoneTemperature(new Temperature(0, 0))}, //The House of the Fierce
             {683, new ZoneTemperature(new Temperature(0, 0))}, //First Alter of Djanan
             {719, new ZoneTemperature(desert)}, //[Trial]Emanation
             {720, new ZoneTemperature(desert)}, //[Trial]Emanation (Extreme)
+            {730, new ZoneTemperature(highAltitude)}, //[Trial]The Pool of Tribute (Extreme)
             {759, new ZoneTemperature(coldCoastal)}, //Doman Enclave
+            {763, new ZoneTemperature(tundra)}, //Eureka Pagos
             {779, new ZoneTemperature(indoors)}, //[Dungeon]Castrum Fluminis
+            {796, new ZoneTemperature(indoors)}, //Masked Carnival (Ul'dah)
             {813, new ZoneTemperature(temperateForest)}, //Lakeland
             {814, new ZoneTemperature(coldCoastal)}, //Kholusia
             {815, new ZoneTemperature(desert)}, //Amh Araeng
             {816, new ZoneTemperature(shrubland)}, //Il Mheg
             {817, new ZoneTemperature(rainForest)}, //Rak'tika Greatwood
-            {818, new ZoneTemperature(new Temperature(30, 38))}, //The Tempest
+            {818, new ZoneTemperature(oceanFloor)}, //The Tempest
             {819, new ZoneTemperature(temperateForest)}, //The Crystarium
             {820, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //Eulmore
             {
@@ -231,9 +239,13 @@ namespace RPToolkit
                 {3279, coldCoastal}, //Skyfront
             }) },
             {845, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague
+            {849, new ZoneTemperature(indoors)}, //[Raid]Eden's Gate: Resurrection
+            {850, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Gate: Descent
+            {851, new ZoneTemperature(oceanFloor)}, //[Raid]Eden's Gate: Inundation
+            {852, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Gate: Supulture
             {858, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague (Extreme)
             {884, new ZoneTemperature(indoors)}, //[Dungeon]The Grand Cosmos
-            {898, new ZoneTemperature(new Temperature(30, 38), new Dictionary<uint, Temperature>() //Anamnesis Anyder
+            {898, new ZoneTemperature(oceanFloor, new Dictionary<uint, Temperature>() //Anamnesis Anyder
             {
                 {3461, indoors} //Anamnesis
             })},
@@ -241,6 +253,7 @@ namespace RPToolkit
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
             {958, new ZoneTemperature(tundra)}, //Garlemald
             {959, new ZoneTemperature(new Temperature(63, 63))}, //Mare Lamentorum
+            {961, new ZoneTemperature(temperateForest)}, //Elpis
             {962, new ZoneTemperature(coldCoastal)}, //Old Sharlayan
             {963, new ZoneTemperature(rainForest, new Dictionary<uint, Temperature>() //Radz-at-Han
             {
@@ -248,6 +261,7 @@ namespace RPToolkit
                 {3869, indoors} //Artha
             })},
             {979, new ZoneTemperature(tundra)}, //Empyreum
+            {1025, new ZoneTemperature(crystal)}, //[Instance]Gates of Pandaemonium
             {1036, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (New?)
             {1038, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell (New)
             {1041, new ZoneTemperature(warmCoastal)}, //[Dungeon]Brayflox (New?)
@@ -270,6 +284,10 @@ namespace RPToolkit
             {1073, new ZoneTemperature(shrubland)}, //Elysion
             {1077, new ZoneTemperature(crystal)}, //[Instanced]Zero's Domain
             {1078, new ZoneTemperature(indoors)}, //[Instanced]Meghaduta Guest Chambers
+            {1081, new ZoneTemperature(crystal)}, //[Raid]Abyssos: The Fifth Circle
+            {1083, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Sixth Circle
+            {1085, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Seventh Circle
+            {1087, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Eighth Circle
             {1089, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Instanced]The Fell Court of Troia
             {
                 {4190, crystal}, //Hydromantic Terraces
@@ -279,6 +297,7 @@ namespace RPToolkit
                 {4190, crystal}, //Hydromantic Terraces
             })},
             {1092, new ZoneTemperature(crystal)}, //[Instanced]Storm's Crown
+            {1093, new ZoneTemperature(indoors)}, //[Instance]Absyssos: The Eighth Circle
         };
 
         /// <summary>
@@ -292,14 +311,14 @@ namespace RPToolkit
         {
             {1, 0}, //Clear Skies
             {2, 0}, //Fair Skies
-            {3, -2}, //Clouds
+            {3, -4}, //Clouds
             {4, -8}, //Fog
             {5, -2}, //Wind
-            {6, -3}, //Gales
+            {6, -4}, //Gales
             {7, -6}, //Rain
             {8, -8}, //Shower
-            {9, -2}, //Thunder
-            {10, -10}, //Thunderstorms
+            {9, -4}, //Thunder
+            {10, -8}, //Thunderstorms
             {11, 1}, //Dust Storms
             {12, 2}, //Sandstorms
             {13, 6}, //Hot Spells

@@ -22,7 +22,8 @@ namespace RPToolkit.Handlers
         internal static byte* currentWeather;
         internal static byte prevWeather;
         internal static Dictionary<byte, string> weathers;
-        internal static byte[] rainWeathers = { 7, 9, 10, 22, 57, 58, 88, 62, 64, 143 };
+        internal static byte[] rainWeathers = { 7, 10, 22, 57, 58, 88, 62, 64, 143 };
+        public static bool isRaining = false;
 
         public WeatherHandler()
         {
@@ -53,12 +54,14 @@ namespace RPToolkit.Handlers
                 {
                     if (rainWeathers.Contains(*currentWeather) && !rainWeathers.Contains(prevWeather) && !Plugin.Condition[ConditionFlag.UsingParasol])
                     {
+                        isRaining = true;
                         ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Plugin.Configuration.temperatureChatType, "Weather");
                         //WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
                         //WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
                     }
                     else if (!rainWeathers.Contains(*currentWeather) && rainWeathers.Contains(prevWeather))
                     {
+                        isRaining = false;
                         ChatHelper.Echo("The rain begins to clear.", Plugin.Configuration.temperatureChatType, "Weather");
                         /*WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
                         if (Condition[ConditionFlag.UsingParasol])

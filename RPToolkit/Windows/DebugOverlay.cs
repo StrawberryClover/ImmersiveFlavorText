@@ -13,11 +13,13 @@ namespace RPToolkit.Windows
 {
     internal class DebugOverlay : Window, IDisposable
     {
+        public static Window window;
         private Plugin Plugin;
         public DebugOverlay(Plugin plugin) : base(
         "Debug Overlay", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoTitleBar
                         | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.AlwaysUseWindowPadding)
         {
+            window = this;
             unsafe
             {
                 float windowWidth = Device.Instance()->Width;

@@ -81,6 +81,10 @@ namespace RPToolkit.Handlers
                     {
                         newTemp -= 11;
                     }
+                    else if (WeatherHandler.isRaining)
+                    {
+                        newTemp -= 6;
+                    }
 
                     if (currentZone != 0 && Math.Abs(newTemp - currentTemp) > maxTempChangePerSecond)
                         currentTemp += newTemp < currentTemp ? -maxTempChangePerSecond : maxTempChangePerSecond;
@@ -94,7 +98,7 @@ namespace RPToolkit.Handlers
                             $"D:{temperatureDivergence}, " +
                             $"Weath:{(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}, " +
                             $"S:{shadeAdjustment}, " +
-                            $"Wet:{((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : 0)}]");
+                            $"Wet:{((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0)}]");
 
                     int newStage = currentTemperatureStage;
                     foreach (KeyValuePair<int, TemperatureDescription> tempStages in Climates.temperatureStages)
