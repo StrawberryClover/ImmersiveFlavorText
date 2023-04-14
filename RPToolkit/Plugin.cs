@@ -56,6 +56,7 @@ using System.Drawing;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using RPToolkit.Localizations;
 using Localization = RPToolkit.Localizations.Localization;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace RPToolkit
 {
@@ -190,6 +191,7 @@ namespace RPToolkit
             if (this.clientState.LocalPlayer != null) OnTerritoryChange();
             this.clientState.TerritoryChanged += OnTerritoryChange;
             this.clientState.Login += OnTerritoryChange;
+            Framework.Update += OnFrameworkUpdate;
 
             /*GameObjectArray[] objectArrays =
             {
@@ -211,9 +213,15 @@ namespace RPToolkit
             if (pluginInterface.IsDev)
             {
                 Condition.ConditionChange += OnConditionChange;
-                //DrawWindow("Debug Overlay");
+                DebugOverlay.window.IsOpen = true;
             }
         }
+
+        public void OnFrameworkUpdate(Framework framework)
+        {
+
+        }
+
 
         private float GetDistanceToObject(GameObject target)
         {
@@ -283,6 +291,7 @@ namespace RPToolkit
             {
                 Condition.ConditionChange -= OnConditionChange;
             }
+            Framework.Update -= OnFrameworkUpdate;
         }
 
         private void DebugStuff(System.Object? source, System.Timers.ElapsedEventArgs e)
@@ -309,7 +318,7 @@ namespace RPToolkit
 
             // temporary variable since you cannot output to this.gameDimensions
             System.Drawing.Rectangle d;
-            GetWindowRect(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, out d);
+            GetWindowRect(Process.GetCurrentProcess().MainWindowHandle, out d);
             this.gameDimensions = d;
         }
 

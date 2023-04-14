@@ -78,8 +78,8 @@ namespace RPToolkit.Localizations
             cold: new TemperatureDescription(
                 increaseDesc: new string[]{
                     "You no longer feel so cold. You haven't stopped shivering, but it almost feels bearable now.",
-                    "You start to warm up slightly, it's becoming more tolerable than before.",
-                    "You are starting to warm up, though you still feel a chill, but not as much as before."
+                    "You start to feel a bit less cold, it's becoming more tolerable than before.",
+                    "You are starting to feel less cold, though you still feel a chill, but not as much as before."
                 },
                 decreaseDesc: new string[]{
                     "You begin to feel quite cold, and start to shiver.",
