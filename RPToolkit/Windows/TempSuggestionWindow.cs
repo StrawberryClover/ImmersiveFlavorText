@@ -92,7 +92,7 @@ namespace RPToolkit.Windows
                     {
                         _ = NetHelper.SubmitDataAsync(
                             zoneID: Plugin.clientState.TerritoryType,
-                            zoneName: Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType)!.PlaceName.Value!.Name.RawString,
+                            zoneName: $"{Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType)!.PlaceNameZone.Value!.Name.RawString}/{Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.clientState.TerritoryType)!.PlaceName.Value!.Name.RawString}",
                             areaID: Plugin.AreaInfo->AreaPlaceNameID,
                             areaName: Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID)!.NameNoArticle!,
                             subAreaID: Plugin.AreaInfo->SubAreaPlaceNameID,

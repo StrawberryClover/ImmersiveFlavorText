@@ -213,7 +213,7 @@ namespace RPToolkit
             if (pluginInterface.IsDev)
             {
                 Condition.ConditionChange += OnConditionChange;
-                DebugOverlay.window.IsOpen = true;
+                //DebugOverlay.window.IsOpen = true;
             }
         }
 
@@ -296,8 +296,10 @@ namespace RPToolkit
 
         private void DebugStuff(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
-            PluginLog.Information($"({AreaInfo->AreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->AreaPlaceNameID).NameNoArticle}\" " +
-                $": ({AreaInfo->SubAreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->SubAreaPlaceNameID).NameNoArticle}\"");
+            PluginLog.Information($"\r\n({clientState.TerritoryType}) \"{Data.GetExcelSheet<TerritoryType>()?.GetRow(clientState.TerritoryType)!.PlaceName.Value!.Name.RawString}\" " +
+                $"\r\n> ({AreaInfo->AreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->AreaPlaceNameID).NameNoArticle}\" " +
+                $"\r\n> ({AreaInfo->SubAreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->SubAreaPlaceNameID).NameNoArticle}\" " +
+                $"\r\n Weather: ({*WeatherHandler.currentWeather}) {Data.GetExcelSheet<Weather>()?.GetRow(*WeatherHandler.currentWeather).Name}");
 
             //var wetness = *((byte*)this.clientState.LocalPlayer.Address + 0x1B1F);
             //*((byte*)this.clientState.LocalPlayer.Address + 0x1B1F) = 36;
@@ -309,6 +311,8 @@ namespace RPToolkit
             //PluginLog.Information(charObject);
             //var baseObject = Convert.ChangeType(charObject, objectType);
             //PluginLog.Information(objectType.ToString() + ": " + baseObject.ToString());
+            //var c = (FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase*)this.clientState.LocalPlayer.Address;
+            //PluginLog.Information($"({c->GetModelType()}) {c->WetnessDepth} : {c->ForcedWetness} : {c->SwimmingWetness} : {c->WeatherWetness}");
         }
 
         private void GetGameDimensions()

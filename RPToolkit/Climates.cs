@@ -43,6 +43,8 @@ namespace RPToolkit
         public static Temperature volcanic = new Temperature(100, 125);
         public static Temperature crystal = new Temperature(30, 55);
         public static Temperature oceanFloor = new Temperature(30, 38);
+        public static Temperature subZero = new Temperature(-66, -81);
+        public static Temperature mountains = new Temperature(29, 53);
         #endregion
 
         public struct Temperature
@@ -210,7 +212,7 @@ namespace RPToolkit
             {614, new ZoneTemperature(temperateForest)}, //Yanxia
             {620, new ZoneTemperature(desert)}, //The Peaks
             {621, new ZoneTemperature(desert)}, //The Lochs
-            {622, new ZoneTemperature(new Temperature(0, 0))}, //The Azim Steppe
+            {622, new ZoneTemperature(mountains)}, //The Azim Steppe
             {626, new ZoneTemperature(coldCoastal)}, //[Dungeon]The Sirensong Sea
             {628, new ZoneTemperature(coldCoastal)}, //Kugane
             {635, new ZoneTemperature(desert)}, //Rhalgrs Reach
@@ -222,6 +224,7 @@ namespace RPToolkit
             {719, new ZoneTemperature(desert)}, //[Trial]Emanation
             {720, new ZoneTemperature(desert)}, //[Trial]Emanation (Extreme)
             {730, new ZoneTemperature(highAltitude)}, //[Trial]The Pool of Tribute (Extreme)
+            {732, new ZoneTemperature(temperateForest)}, //Eureka Anemos
             {759, new ZoneTemperature(coldCoastal)}, //Doman Enclave
             {763, new ZoneTemperature(tundra)}, //Eureka Pagos
             {779, new ZoneTemperature(indoors)}, //[Dungeon]Castrum Fluminis
@@ -245,10 +248,14 @@ namespace RPToolkit
             {852, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Gate: Supulture
             {858, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague (Extreme)
             {884, new ZoneTemperature(indoors)}, //[Dungeon]The Grand Cosmos
-            {898, new ZoneTemperature(oceanFloor, new Dictionary<uint, Temperature>() //Anamnesis Anyder
+            {898, new ZoneTemperature(oceanFloor, new Dictionary<uint, Temperature>() //[Dungeon]Anamnesis Anyder
             {
                 {3461, indoors} //Anamnesis
             })},
+            {902, new ZoneTemperature(shrubland)}, //[Raid]Eden's Verse: Fulmination
+            {903, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Furor
+            {904, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Iconoclasm
+            {905, new ZoneTemperature(subZero)}, //[Raid]Eden's Verse: Refulgence
             {957, new ZoneTemperature(rainForest)}, //Thavnair
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
             {958, new ZoneTemperature(tundra)}, //Garlemald
@@ -326,7 +333,8 @@ namespace RPToolkit
             {15, -6}, //Snows
             {16, -10}, //Blizzards
             {17, -3}, //Gloom
-            {28, -3}, //Gales
+            {26, 10}, //Heat Waves
+            {28, -4}, //Gales
         };
 
         public static int GetTemperature(ushort zoneId, uint areaId, uint subAreaId, float time)
