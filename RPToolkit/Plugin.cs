@@ -156,9 +156,6 @@ namespace RPToolkit
 
             GetGameDimensions();
 
-            var world = clientState.LocalPlayer?.CurrentWorld.GameData.Name.RawString;
-            PluginLog.Information($"Hello {world}!");
-
             #region Windows Initialization
             WindowSystem.AddWindow(new ConfigWindow(this));
             WindowSystem.AddWindow(new TempSuggestionWindow(this));
@@ -190,8 +187,11 @@ namespace RPToolkit
             //NetHelper.SubmitDataAsync(this.clientState.LocalPlayer?.Name.ToString(), Data.GetExcelSheet<TerritoryType>()?.GetRow(this.clientState.TerritoryType).PlaceName.Value.Name.RawString, currentTemp.ToString(), currentTemp.ToString());
             if (this.clientState.LocalPlayer != null) OnTerritoryChange();
             this.clientState.TerritoryChanged += OnTerritoryChange;
-            this.clientState.Login += OnTerritoryChange;
+            this.clientState.Login += OnLogin;
             Framework.Update += OnFrameworkUpdate;
+
+            if (clientState.LocalPlayer != null)
+                OnLogin();
 
             /*GameObjectArray[] objectArrays =
             {
@@ -233,7 +233,8 @@ namespace RPToolkit
 
         private void OnConditionChange(ConditionFlag flag, bool value)
         {
-            PluginLog.Information(flag.ToString() + " " + value.ToString());
+            if (PluginInterface.IsDev)
+                PluginLog.Information(flag.ToString() + " " + value.ToString());
         }
 
         private void InitializePeriodicTicks()
@@ -286,7 +287,7 @@ namespace RPToolkit
 
             AppDomain.CurrentDomain.FirstChanceException -= HandleException;
             this.clientState.TerritoryChanged -= OnTerritoryChange;
-            this.clientState.Login -= OnTerritoryChange;
+            this.clientState.Login -= OnLogin;
             if (PluginInterface.IsDev)
             {
                 Condition.ConditionChange -= OnConditionChange;
@@ -296,11 +297,6 @@ namespace RPToolkit
 
         private void DebugStuff(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
-            PluginLog.Information($"\r\n({clientState.TerritoryType}) \"{Data.GetExcelSheet<TerritoryType>()?.GetRow(clientState.TerritoryType)!.PlaceName.Value!.Name.RawString}\" " +
-                $"\r\n> ({AreaInfo->AreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->AreaPlaceNameID).NameNoArticle}\" " +
-                $"\r\n> ({AreaInfo->SubAreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->SubAreaPlaceNameID).NameNoArticle}\" " +
-                $"\r\n Weather: ({*WeatherHandler.currentWeather}) {Data.GetExcelSheet<Weather>()?.GetRow(*WeatherHandler.currentWeather).Name}");
-
             //var wetness = *((byte*)this.clientState.LocalPlayer.Address + 0x1B1F);
             //*((byte*)this.clientState.LocalPlayer.Address + 0x1B1F) = 36;
             //var wetness = (int*)(clientState.LocalPlayer.Address + 0x2B0);
@@ -331,16 +327,33 @@ namespace RPToolkit
             GetGameDimensions();
         }
 
+        private void OnTerritoryChange(object? sender, ushort e) { OnTerritoryChange(); }
         private void OnTerritoryChange()
         {
             TemperatureHandler.NewZone();
         }
-        private void OnTerritoryChange(object? sender, ushort e)
+
+        private void OnLogin(object? sender, EventArgs e) { OnLogin(); }
+        private void OnLogin()
         {
-            OnTerritoryChange();
-        }
-        private void OnTerritoryChange(object? sender, EventArgs e)
-        {
+            var world = clientState.LocalPlayer?.CurrentWorld.GameData.Name.RawString;
+            var dataCenter = Data.GetExcelSheet<World>()?.GetRow((uint)clientState.LocalPlayer?.CurrentWorld.Id).DataCenter.Value.Name.RawString;
+            PluginLog.Information($"Hello ({dataCenter}) {world}!");
+
+            if (!Configuration.useCelsius.HasValue)
+            {
+                string[] americanDataCenters = { "aether", "crystal", "dynamis", "primal" };
+                if (americanDataCenters.Contains(dataCenter.ToLower()))
+                {
+                    Configuration.useCelsius = false;
+                }
+                else
+                {
+                    Configuration.useCelsius = true;
+                }
+                Configuration.Save();
+            }
+
             OnTerritoryChange();
         }
 

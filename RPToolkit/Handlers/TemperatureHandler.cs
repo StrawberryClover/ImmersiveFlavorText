@@ -31,6 +31,7 @@ namespace RPToolkit.Handlers
         private static int temperatureDivergenceLimit = 5;
 
         private static int currentZone;
+        public static string debugInfo;
 
         public static RaycastHit? lastShadedHit = null;
 
@@ -92,13 +93,14 @@ namespace RPToolkit.Handlers
 
 
                     if (Plugin.Singleton.PluginInterface.IsDev)
-                        PluginLog.Information($"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2, '0')} ET) " +
-                            $"Current Temp: {currentTemp} " +
-                            $"[B:{Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours)}, " +
-                            $"D:{temperatureDivergence}, " +
-                            $"Weath:{(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}, " +
-                            $"S:{shadeAdjustment}, " +
-                            $"Wet:{((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0)}]");
+                        debugInfo = 
+                            //$"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2, '0')} ET) " +
+                            $"Current Temperature: {currentTemp}{GetTemperatureUnit()} " +
+                            $"\r\n    Base: {Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours)}{GetTemperatureUnit()} " +
+                            $"\r\n    Variance: {temperatureDivergence}{GetTemperatureUnit()}  " +
+                            $"\r\n    Weather Modifier: {(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}{GetTemperatureUnit()} " +
+                            $"\r\n    Shade: {shadeAdjustment}{GetTemperatureUnit()} " +
+                            $"\r\n    Wetness: {((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0)}{GetTemperatureUnit()}";
 
                     int newStage = currentTemperatureStage;
                     foreach (KeyValuePair<int, TemperatureDescription> tempStages in Climates.temperatureStages)
@@ -228,6 +230,13 @@ namespace RPToolkit.Handlers
             }
             if (!hitSomething) lastShadedHit = null;
             return hitSomething;
+        }
+
+        public static string GetTemperatureUnit()
+        {
+            if (!Plugin.Configuration.useCelsius.HasValue) return "";
+
+            return Plugin.Configuration.useCelsius.Value ? "℃" : "°F";
         }
     }
 }
