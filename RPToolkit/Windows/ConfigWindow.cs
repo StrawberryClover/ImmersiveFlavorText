@@ -4,12 +4,16 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Game.ClientState;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json.Linq;
+using RPToolkit.Handlers;
+using RPToolkit.Helpers;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RPToolkit.Windows;
 
@@ -62,6 +66,17 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.PopID();
 
+            if (Plugin.Singleton.PluginInterface.IsDev)
+            {
+                ImGui.PushID("Debug");
+                if (ImGui.BeginTabItem("Debug"))
+                {
+                    DrawDebugInfo();
+                    ImGui.EndTabItem();
+                }
+                ImGui.PopID();
+            }
+
             ImGui.EndTabBar();
         }
     }
@@ -76,16 +91,13 @@ public class ConfigWindow : Window, IDisposable
                 ImGui.EndTabItem();
             }
 
-            if (!Plugin.Singleton.glamourerAvailable)
-            {
-                ImGui.BeginDisabled();
-            }
+            if (!Plugin.Singleton.glamourerAvailable) ImGui.BeginDisabled();
             if (ImGui.BeginTabItem("Climate Outfits"))
             {
                 DrawClimateOutfitSettings();
                 ImGui.EndTabItem();
             }
-            ImGui.EndDisabled();
+            if (!Plugin.Singleton.glamourerAvailable) ImGui.EndDisabled();
             if (!Plugin.Singleton.glamourerAvailable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
                 //ImGui.SetNextWindowBgAlpha(1);
@@ -125,6 +137,30 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.EndCombo();
         }
+        bool useCelsius = Configuration.useCelsius.HasValue ? Configuration.useCelsius.Value : false;
+        ImGui.Text("Temperature Unit");
+        ImGui.SameLine();
+        if (useCelsius) ImGui.BeginDisabled();
+        ImGui.PushID("celsiusButton");
+        if (ImGui.SmallButton("Celsius"))
+        {
+            Configuration.useCelsius = true;
+            Configuration.Save();
+        }
+        ImGui.PopID();
+        if (useCelsius) ImGui.EndDisabled();
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 8);
+        if (!useCelsius) ImGui.BeginDisabled();
+        ImGui.PushID("fahrenheitButton");
+        if (ImGui.SmallButton("Fahrenheit"))
+        {
+            Configuration.useCelsius = false;
+            Configuration.Save();
+        }
+        ImGui.PopID();
+        if (!useCelsius) ImGui.EndDisabled();
+        ImGui.Separator();
         var enableShade = this.Configuration.enableShade;
         if (ImGui.Checkbox("(EXPERIMENTAL) Temperature is cooler in shadows", ref enableShade))
         {
@@ -230,6 +266,7 @@ public class ConfigWindow : Window, IDisposable
                 this.Configuration.climateOutfitData.RemoveAt(i);
                 this.Configuration.Save();
             }
+            ImGui.PopID();
         }
 
         if (ImGui.Button("+"))
@@ -256,5 +293,52 @@ public class ConfigWindow : Window, IDisposable
             this.Configuration.Save();
         }
         ImGui.PopItemWidth();
+    }
+
+    private void DrawDebugInfo()
+    {
+        if (Plugin.Singleton.clientState.LocalPlayer != null)
+        {
+            unsafe {
+                PushAreaDetails("Zone Info", Plugin.Singleton.clientState.TerritoryType.ToString(), Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.Singleton.clientState.TerritoryType)!.PlaceName.Value!.Name.RawString);
+                PushAreaDetails("Area Info", Plugin.AreaInfo->AreaPlaceNameID.ToString(), Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID).NameNoArticle);
+                PushAreaDetails("SubArea Info", Plugin.AreaInfo->SubAreaPlaceNameID.ToString(), Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID).NameNoArticle);
+                if (TemperatureHandler.debugInfo != null)
+                {
+                    ImGui.Separator();
+                    ImGui.Text(TemperatureHandler.debugInfo);
+                }
+                ImGui.Separator();
+                ImGui.Text($"Weather: ({*WeatherHandler.currentWeather}) {Plugin.Data.GetExcelSheet<Weather>()?.GetRow(*WeatherHandler.currentWeather).Name}");
+                /*PluginLog.Information($"\r\n({clientState.TerritoryType}) \"{Data.GetExcelSheet<TerritoryType>()?.GetRow(clientState.TerritoryType)!.PlaceName.Value!.Name.RawString}\" " +
+                $"\r\n> ({AreaInfo->AreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->AreaPlaceNameID).NameNoArticle}\" " +
+                $"\r\n> ({AreaInfo->SubAreaPlaceNameID}) \"{Data.GetExcelSheet<PlaceName>()?.GetRow(AreaInfo->SubAreaPlaceNameID).NameNoArticle}\" " +
+                    $"\r\n Weather: ({*WeatherHandler.currentWeather}) {Data.GetExcelSheet<Weather>()?.GetRow(*WeatherHandler.currentWeather).Name}");*/
+            }
+        }
+    }
+
+    private float CalcTextSize(string text)
+    {
+        return ImGui.CalcTextSize(text).X + ImGui.GetStyle().CellPadding.X * 2;
+    }
+
+    private void PushAreaDetails(string label, string areaID, string areaName)
+    {
+        ImGui.Text(label);
+        ImGui.SameLine();
+        ImGui.Text("ID:");
+        ImGui.SameLine();
+        ImGui.PushID(label + "areaID" + areaID);
+        ImGui.PushItemWidth(CalcTextSize("00000"));
+        ImGui.InputText("", ref areaID, (uint)areaID.Length, ImGuiInputTextFlags.ReadOnly);
+        ImGui.PopID();
+        ImGui.SameLine();
+        ImGui.Text(" Name:");
+        ImGui.SameLine();
+        ImGui.PushID(label + "areaName" + areaName);
+        ImGui.PushItemWidth(CalcTextSize(areaName));
+        ImGui.InputText("", ref areaName, (uint)areaName!.Length, ImGuiInputTextFlags.ReadOnly);
+        ImGui.PopID();
     }
 }
