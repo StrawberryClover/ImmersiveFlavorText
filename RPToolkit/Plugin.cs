@@ -57,6 +57,10 @@ using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using RPToolkit.Localizations;
 using Localization = RPToolkit.Localizations.Localization;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using RPToolkit.Data;
 
 namespace RPToolkit
 {
@@ -82,6 +86,10 @@ namespace RPToolkit
         public bool glamourerAvailable { get; private set; }
 
         public static TerritoryInfo* AreaInfo => TerritoryInfo.Instance();
+
+        private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, GameObjectID targetId, uint a4, uint a5,
+        uint a6, IntPtr a7);
+        private readonly Hook<UseActionDelegate>? useActionHook;
 
         public static Dictionary<int, string> parasols { get; private set; } = new Dictionary<int, string>{
             {58001, "Parasol"},
@@ -193,6 +201,10 @@ namespace RPToolkit
             if (clientState.LocalPlayer != null)
                 OnLogin();
 
+            var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
+            useActionHook = Hook<UseActionDelegate>.FromAddress(hookPtr, OnUseAction);
+            useActionHook.Enable();
+
             /*GameObjectArray[] objectArrays =
             {
                 TargetSystem.Instance()->ObjectFilterArray0,
@@ -229,6 +241,55 @@ namespace RPToolkit
             //distance -= source.HitboxRadius;
             distance -= target.HitboxRadius;
             return distance;
+        }
+
+        private bool OnUseAction(IntPtr manager, ActionType actionType, uint actionId, GameObjectID targetId, uint a4, uint a5, uint a6, IntPtr a7)
+        {
+            PluginLog.Information($"{actionType}, {actionId}, {targetId.ObjectID}, {a4}, {a5}, {a6}, {a7}");
+            if (actionType == ActionType.Item)
+            {
+                var itemId = actionId;
+                bool itemHQ = false;
+                if (itemId >= 1000000)
+                {
+                    itemHQ = true;
+                    itemId -= 1000000;
+                }
+                PluginLog.Information($"{itemId}, {itemHQ}");
+                var item = Data.GetExcelSheet<Item>().GetRow(itemId);
+                PluginLog.Information($"{(itemHQ ? "(HQ) " : "")}{item.Name.RawString}");
+
+                if (Consumables.consumables.ContainsKey(itemId))
+                {
+                    var consumable = Consumables.consumables[itemId];
+                    if (Configuration.showFoodMessages)
+                    {
+                        string name = "Food";
+                        var flavorText = consumable.flavorText.Replace("<food>", item.Name.RawString.ToLower()).Replace("<temp>", consumable.temp.ToString().ToLower()).Replace("<type>", consumable.type.ToString().ToLower());
+                        if (itemHQ) flavorText = "Wow, what amazing quality, this tastes amazing! " + flavorText;
+                        if (consumable.type == Consumables.FoodType.LightDrink || consumable.type == Consumables.FoodType.RefreshingDrink)
+                            name = "Drink";
+
+                        ChatHelper.Echo(flavorText, Configuration.flavorTextChatType, name);
+                    }
+                    
+                    if (Configuration.foodAffectsTemperature)
+                    {
+                        float temperatureAdjustment = 6f;
+                        if (itemHQ) temperatureAdjustment = 12f;
+
+                        if (consumable.temp == Consumables.FoodTemp.Cold)
+                        {
+                            temperatureAdjustment = -temperatureAdjustment;
+                        }
+                        TemperatureHandler.consumableAdjustment += temperatureAdjustment;
+                        if (TemperatureHandler.consumableAdjustment > TemperatureHandler.maxConsumableAdjustment) TemperatureHandler.consumableAdjustment = TemperatureHandler.maxConsumableAdjustment;
+                        if (TemperatureHandler.consumableAdjustment < -TemperatureHandler.maxConsumableAdjustment) TemperatureHandler.consumableAdjustment = -TemperatureHandler.maxConsumableAdjustment;
+                    }
+                }
+            }
+
+            return useActionHook!.Original(manager, actionType, actionId, targetId, a4, a5, a6, a7);
         }
 
         private void OnConditionChange(ConditionFlag flag, bool value)
@@ -284,6 +345,7 @@ namespace RPToolkit
             WindowSystem.RemoveAllWindows();
             CommandHandler.Dispose();
             CharacterWindowUIHandler.Dispose();
+            useActionHook.Dispose();
 
             AppDomain.CurrentDomain.FirstChanceException -= HandleException;
             this.clientState.TerritoryChanged -= OnTerritoryChange;
@@ -331,6 +393,7 @@ namespace RPToolkit
         private void OnTerritoryChange()
         {
             TemperatureHandler.NewZone();
+            currentCustomizationString = "";
         }
 
         private void OnLogin(object? sender, EventArgs e) { OnLogin(); }
@@ -400,6 +463,7 @@ namespace RPToolkit
         {
             if (glamourerAvailable && !IsPlayerOccupied() && !Condition[ConditionFlag.Fishing])
             {
+                string newCustomizationString = currentCustomizationString;
                 foreach (var outfitData in Configuration.climateOutfitData)
                 {
                     if (clientState.LocalPlayer?.ClassJob.Id == outfitData.jobID)
@@ -411,32 +475,68 @@ namespace RPToolkit
                             {
                                 correctWeather = true;
                             }
+
+                            if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Only_When_Raining) //set to only swimming
+                            {
+                                ChangeOutfit(outfitData.customizationString);
+                                return;
+                            }
                         }
                         else
                             correctWeather = true;
 
-                        if (correctWeather)
+                        bool correctSwimmingCondition = false;
+                        if ((outfitData.climateConditions & (int)ClimateOutfitData.ClimateConditions.Swimming) == (int)ClimateOutfitData.ClimateConditions.Swimming)
+                        {
+                            if (Condition[ConditionFlag.Swimming] || Condition[ConditionFlag.Diving])
+                            {
+                                correctSwimmingCondition = true;
+
+                                if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Swimming) //set to only swimming
+                                {
+                                    ChangeOutfit(outfitData.customizationString);
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                            correctSwimmingCondition = true;
+
+                        if (correctWeather && correctSwimmingCondition)
                         {
                             //PluginLog.Information(currentTemperatureStage.ToString());
                             //PluginLog.Information(Climates.temperatureStages.ElementAt(0).Key);
+                            bool correctTemperature = false;
                             for (int i = 1; i < Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)).Length; i++)
                             {
                                 int value = ((int[])Enum.GetValues(typeof(ClimateOutfitData.ClimateConditions)))[i];
-                                if ((outfitData.climateConditions & value) == value && TemperatureHandler.currentTemperatureStage == Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key)
+                                if ((outfitData.climateConditions & value) == value)
                                 {
-                                    if (PluginInterface.IsDev)
-                                        PluginLog.Information(i + ": " + Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value) + " (" + Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key + ")");
-                                    if (currentCustomizationString != outfitData.customizationString)
+                                    if (TemperatureHandler.currentTemperatureStage == Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key)
                                     {
-                                        ApplyGlamourerEquipment(outfitData.customizationString);
-                                        currentCustomizationString = outfitData.customizationString;
+                                        if (PluginInterface.IsDev)
+                                            PluginLog.Information(i + ": " + Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value) + " (" + Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key + ")");
+
+                                        newCustomizationString = outfitData.customizationString;
+                                        correctTemperature = true;
+                                        break;
                                     }
-                                    return;
                                 }
                             }
                         }
                     }
                 }
+                if (newCustomizationString != currentCustomizationString) ChangeOutfit(newCustomizationString);
+            }
+        }
+
+        private void ChangeOutfit(string customizationString)
+        {
+            if (currentCustomizationString != customizationString)
+            {
+                PluginLog.Information($"Changing Outfit Data: {customizationString}");
+                ApplyGlamourerEquipment(customizationString);
+                currentCustomizationString = customizationString;
             }
         }
     }

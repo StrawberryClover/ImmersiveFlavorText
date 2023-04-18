@@ -7,7 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPToolkit
+namespace RPToolkit.Data
 {
     internal class Climates
     {
@@ -81,7 +81,11 @@ namespace RPToolkit
         /// </value>
         public static Dictionary<ushort, ZoneTemperature> zoneTemperatures { get; private set; } = new Dictionary<ushort, ZoneTemperature>
         {
-            // Zone ID, Avg High Temp, Avg Low Temp (Yes, in the end I've decided to use Fahrenheit. I don't feel like using floats.)
+            // Yes, in the end I've decided to use Fahrenheit. There are 2 reasons for this:
+            // 1. I live in the US, unfortunately, and since I am the main person coming up with these temperature values, it's easier for me to understand since it's what everyone around me uses irl and that I get told on a day to day basis.
+            // 2. I just felt like it might be easier to use ints instead of floats, and might be a smaller data type, even though that doesn't really make much of a difference.
+            //
+            // Zone ID, Avg High Temp, Avg Low Temp
             {128, new ZoneTemperature(warmCoastal)}, //Limsa (Upper)
             {129, new ZoneTemperature(warmCoastal)}, //Limsa (Lower)
             {130, new ZoneTemperature(desert,new Dictionary<uint, Temperature>() //Ul dah - Steps of Nald
@@ -96,7 +100,12 @@ namespace RPToolkit
             {137, new ZoneTemperature(warmCoastal)}, //Eastern La Noscea
             {138, new ZoneTemperature(warmCoastal)}, //Western La Noscea
             {139, new ZoneTemperature(warmCoastal)}, //Upper La Noscea
-            {140, new ZoneTemperature(desert)}, //Western Thanalan
+            {140, new ZoneTemperature(desert, new Dictionary<uint, Temperature>() //Western Thanalan
+            {
+                {246, warmCoastal }, //Cape Westwind
+                {274, warmCoastal }, //Vesper Bay
+                {472, indoors } //Waking Sands
+            })},
             {141, new ZoneTemperature(desert)}, //Central Thanalan
             {144, new ZoneTemperature(indoors)}, //Gold Saucer
             {145, new ZoneTemperature(desert)}, //Eastern Thanalan
@@ -147,6 +156,7 @@ namespace RPToolkit
             {212, new ZoneTemperature(indoors)}, //Waking Sands
             {250, new ZoneTemperature(warmCoastal)}, //Wolves Den Pier
             {266, new ZoneTemperature(desert)}, //[Instanced]Eastern Thanalan (BLM Job Quest)
+            {269, new ZoneTemperature(desert)}, //[Instanced]Moondrip
             {281, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Leviathan
             {286, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
             {288, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
@@ -178,6 +188,7 @@ namespace RPToolkit
             {374, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Ramuh
             {376, new ZoneTemperature(new Temperature(0, 0))}, //Frontlines
             {377, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Shiva
+            {386, new ZoneTemperature(indoors)}, //Goblet Private Quarters
             {387, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]SastashaHM
             {388, new ZoneTemperature(indoors)}, //Gold Saucer - Chocobo Square
             {395, new ZoneTemperature(new Temperature(0, 0))}, //Intercessory
@@ -191,6 +202,7 @@ namespace RPToolkit
             {419, new ZoneTemperature(tundra)}, //Ishgard - The Pillars
             {421, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Vault
             {422, new ZoneTemperature(new Temperature(0, 0))}, //Frontlines - Slaughter
+            {424, new ZoneTemperature(indoors)}, //Company Workshop (The Goblet)
             {426, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Chrysalis
             {427, new ZoneTemperature(indoors)}, //Ishgard - Scholasticate
             {433, new ZoneTemperature(indoors)}, //Ishgard - Fortempts Manor
@@ -256,6 +268,7 @@ namespace RPToolkit
             {903, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Furor
             {904, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Iconoclasm
             {905, new ZoneTemperature(subZero)}, //[Raid]Eden's Verse: Refulgence
+            {934, new ZoneTemperature(indoors)}, //[Trial]Castrum Marinum/Emerald Weapon
             {957, new ZoneTemperature(rainForest)}, //Thavnair
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
             {958, new ZoneTemperature(tundra)}, //Garlemald
@@ -342,11 +355,11 @@ namespace RPToolkit
             float perc;
             if (time < coldestHour)
             {
-                perc = 1 - ((time + 24 - hottestHour) / (coldestHour + 24 - hottestHour));
+                perc = 1 - (time + 24 - hottestHour) / (coldestHour + 24 - hottestHour);
             }
             else if (time > hottestHour)
             {
-                perc = 1 - ((time - hottestHour) / (24 + coldestHour - hottestHour));
+                perc = 1 - (time - hottestHour) / (24 + coldestHour - hottestHour);
             }
             else
             {
@@ -354,8 +367,8 @@ namespace RPToolkit
             }
             if (zoneTemperatures.ContainsKey(zoneId))
             {
-                ZoneTemperature baseZone = zoneTemperatures[zoneId];
-                Temperature refTemp = baseZone.baseTemperature;
+                var baseZone = zoneTemperatures[zoneId];
+                var refTemp = baseZone.baseTemperature;
 
                 if (subAreaId != 0 && baseZone.subAreas.ContainsKey(subAreaId))
                     refTemp = baseZone.subAreas[subAreaId];
@@ -364,7 +377,7 @@ namespace RPToolkit
 
                 //int temp = (int)Math.Round(perc * (temperatures[zoneId].high - temperatures[zoneId].low) + temperatures[zoneId].low);
                 //PluginLog.Information($"{perc}: {SinDistribution(perc, 0.5, 2.0, temperatures[zoneId].low, temperatures[zoneId].high)}");
-                int temp = (int)Math.Round(SinDistribution(perc, 0.5, 2.0, refTemp.low, refTemp.high));
+                var temp = (int)Math.Round(SinDistribution(perc, 0.5, 2.0, refTemp.low, refTemp.high));
                 //PluginLog.Information($"{perc + ((perc - 0.5) * 0.5)}");
 
                 return temp;
@@ -377,8 +390,8 @@ namespace RPToolkit
             var amplitude = (high - low) / 2;
             var mean = low + amplitude;
             //PluginLog.Information($"({value} - {lowToHighMeanPoint}) % {length}) = {((value - lowToHighMeanPoint) % length).ToString()}");
-            return mean + (amplitude * Math.Sin(
-                (((value - lowToHighMeanPoint) % length) / length) * 2 * Math.PI));
+            return mean + amplitude * Math.Sin(
+                (value - lowToHighMeanPoint) % length / length * 2 * Math.PI);
         }
     }
 }

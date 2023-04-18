@@ -13,11 +13,14 @@ namespace RPToolkit
         public int Version { get; set; } = 1;
 
         //public int SelectedParasolID { get; set; } = 58001;
-        public bool enableTemperatureMessages { get; set; } = true;
-        public XivChatType temperatureChatType = XivChatType.Echo;
+        public bool showTemperatureMessages { get; set; } = true;
+        public XivChatType flavorTextChatType = XivChatType.Echo;
         public bool? useCelsius;
         public bool enableShade = true;
         public bool showTemperatureSuggestionPopup = false;
+
+        public bool showFoodMessages = true;
+        public bool foodAffectsTemperature = true;
 
         public int minPickpocketAmt = 1;
         public int maxPickpocketAmt = 20000;
