@@ -6,6 +6,7 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Lumina.Excel.GeneratedSheets;
+using RPToolkit.Data;
 using RPToolkit.Helpers;
 using RPToolkit.Localizations;
 using RPToolkit.Windows;
@@ -29,6 +30,9 @@ namespace RPToolkit.Handlers
         private static int temperatureStageShiftCooldown = 30;
         public static int temperatureDivergence = 0;
         private static int temperatureDivergenceLimit = 5;
+        public static float consumableAdjustment = 0f;
+        private static float consumableDecay = 0.1f;
+        public static float maxConsumableAdjustment { get; private set; } = 12f;
 
         private static int currentZone;
         public static string debugInfo;
@@ -44,8 +48,9 @@ namespace RPToolkit.Handlers
         {
             if (!Plugin.Singleton.IsPlayerOccupied())
             {
-                if (Plugin.Configuration.enableTemperatureMessages && Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high != 0))
+                if (Plugin.Configuration.showTemperatureMessages && Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high != 0))
                 {
+                    // Random Temperature Variance
                     secPassed++;
                     if (secPassed >= secUntilDivergenceUpdate)
                     {
@@ -58,6 +63,7 @@ namespace RPToolkit.Handlers
                         }
                     }
 
+                    // Base Temperature
                     float calcHours = TimeHelper.GetTotalHours();
                     int newTemp = Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours);
                     newTemp += (Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather)
@@ -65,6 +71,7 @@ namespace RPToolkit.Handlers
                         : 0);
                     newTemp += temperatureDivergence;
 
+                    // Shade Adjustments
                     int shadeAdjustment = 0;
                     bool inShade = RaycastSun();
                     if (Plugin.Configuration.enableShade && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high)
@@ -78,6 +85,7 @@ namespace RPToolkit.Handlers
                     }
                     newTemp += shadeAdjustment;
 
+                    // Player Wetness Adjustments (swimming, raining)
                     if (Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving])
                     {
                         newTemp -= 11;
@@ -87,21 +95,30 @@ namespace RPToolkit.Handlers
                         newTemp -= 6;
                     }
 
+                    // Food/Water adjustments
+                    if (Math.Abs(consumableAdjustment) <= consumableDecay) consumableAdjustment = 0;
+                    else if (consumableAdjustment > 0) consumableAdjustment -= consumableDecay;
+                    else if (consumableAdjustment < 0) consumableAdjustment += consumableDecay;
+                    newTemp += (int)Math.Round(consumableAdjustment);
+
+                    // Smooth temperature shift
                     if (currentZone != 0 && Math.Abs(newTemp - currentTemp) > maxTempChangePerSecond)
                         currentTemp += newTemp < currentTemp ? -maxTempChangePerSecond : maxTempChangePerSecond;
                     else currentTemp = newTemp;
 
-
+                    // Debug Message
                     if (Plugin.Singleton.PluginInterface.IsDev)
                         debugInfo = 
                             //$"({TimeHelper.GetHours().ToString().PadLeft(2, '0')}:{TimeHelper.GetMinutes().ToString().PadLeft(2, '0')}:{TimeHelper.GetSeconds().ToString().PadLeft(2, '0')} ET) " +
-                            $"Current Temperature: {currentTemp}{GetTemperatureUnit()} " +
-                            $"\r\n    Base: {Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours)}{GetTemperatureUnit()} " +
-                            $"\r\n    Variance: {temperatureDivergence}{GetTemperatureUnit()}  " +
-                            $"\r\n    Weather Modifier: {(Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0)}{GetTemperatureUnit()} " +
-                            $"\r\n    Shade: {shadeAdjustment}{GetTemperatureUnit()} " +
-                            $"\r\n    Wetness: {((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0)}{GetTemperatureUnit()}";
+                            $"Current Temperature: {ConvertTemperature(currentTemp)} " +
+                            $"\r\n    Base: {ConvertTemperature(Climates.GetTemperature(Plugin.Singleton.clientState.TerritoryType, Plugin.AreaInfo->AreaPlaceNameID, Plugin.AreaInfo->SubAreaPlaceNameID, calcHours))} " +
+                            $"\r\n    Variance: {ConvertTemperature(temperatureDivergence)}  " +
+                            $"\r\n    Weather Modifier: {ConvertTemperature((Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0))} " +
+                            $"\r\n    Shade: {ConvertTemperature(shadeAdjustment)} " +
+                            $"\r\n    Wetness: {ConvertTemperature(((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0))}" +
+                            $"\r\n    Food/Drink: {ConvertTemperature((int)Math.Round(consumableAdjustment))}";
 
+                    // Temperature Stage
                     int newStage = currentTemperatureStage;
                     foreach (KeyValuePair<int, TemperatureDescription> tempStages in Climates.temperatureStages)
                     {
@@ -120,13 +137,14 @@ namespace RPToolkit.Handlers
                             }
                         }
                     }
+                    // Limit Stage Shift Frequency
                     temperatureStageShiftSec++;
                     if (currentTemperatureStage != newStage && temperatureStageShiftSec >= temperatureStageShiftCooldown)
                     {
                         if (newStage < currentTemperatureStage)
-                            ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc, Plugin.Configuration.temperatureChatType, "Temperature");
+                            ChatHelper.Echo(Climates.temperatureStages[newStage].decreaseDesc, Plugin.Configuration.flavorTextChatType, "Temperature");
                         else if (newStage > currentTemperatureStage)
-                            ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc, Plugin.Configuration.temperatureChatType, "Temperature");
+                            ChatHelper.Echo(Climates.temperatureStages[newStage].increaseDesc, Plugin.Configuration.flavorTextChatType, "Temperature");
                         currentTemperatureStage = newStage;
                         temperatureStageShiftSec = 0;
                     }
@@ -237,6 +255,18 @@ namespace RPToolkit.Handlers
             if (!Plugin.Configuration.useCelsius.HasValue) return "";
 
             return Plugin.Configuration.useCelsius.Value ? "℃" : "°F";
+        }
+
+        public static string ConvertTemperature(int temperature)
+        {
+            if (!Plugin.Configuration.useCelsius.HasValue) return "";
+
+            return Plugin.Configuration.useCelsius.Value ? $"{FahrenheitToCelsius(temperature)}℃" : $"{temperature}°F";
+        }
+
+        public static float FahrenheitToCelsius(int temperature)
+        {
+            return (temperature - 32) * 5 / 9;
         }
     }
 }

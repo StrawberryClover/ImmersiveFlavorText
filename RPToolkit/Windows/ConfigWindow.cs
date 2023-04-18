@@ -52,9 +52,21 @@ public class ConfigWindow : Window, IDisposable
     {
         if (ImGui.BeginTabBar("mainTabBar"))
         {
+            if (ImGui.BeginTabItem("General"))
+            {
+                DrawGeneralSettings();
+                ImGui.EndTabItem();
+            }
+
             if (ImGui.BeginTabItem("Climate"))
             {
                 DrawClimateSettings();
+                ImGui.EndTabItem();
+            }
+
+            if (ImGui.BeginTabItem("Food & Drinks"))
+            {
+                DrawFoodSettings();
                 ImGui.EndTabItem();
             }
 
@@ -66,8 +78,8 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.PopID();
 
-            if (Plugin.Singleton.PluginInterface.IsDev)
-            {
+            //if (Plugin.Singleton.PluginInterface.IsDev)
+            //{
                 ImGui.PushID("Debug");
                 if (ImGui.BeginTabItem("Debug"))
                 {
@@ -75,67 +87,81 @@ public class ConfigWindow : Window, IDisposable
                     ImGui.EndTabItem();
                 }
                 ImGui.PopID();
-            }
+            //}
 
             ImGui.EndTabBar();
         }
     }
 
-    private void DrawClimateSettings()
+    private void DrawGeneralSettings()
     {
-        if (ImGui.BeginTabBar("climateTabBar"))
+        var selectedChatType = this.Configuration.flavorTextChatType;
+        ImGui.Text("Flavor Text Chat Type");
+        ImGui.SameLine();
+        ImGui.PushID("chatTypeCombo");
+        if (ImGui.BeginCombo("", selectedChatType.ToString())) // The second parameter is the label previewed before opening the combo.
         {
-            if (ImGui.BeginTabItem("General"))
-            {
-                DrawGeneralClimateSettings();
-                ImGui.EndTabItem();
-            }
-
-            if (!Plugin.Singleton.glamourerAvailable) ImGui.BeginDisabled();
-            if (ImGui.BeginTabItem("Climate Outfits"))
-            {
-                DrawClimateOutfitSettings();
-                ImGui.EndTabItem();
-            }
-            if (!Plugin.Singleton.glamourerAvailable) ImGui.EndDisabled();
-            if (!Plugin.Singleton.glamourerAvailable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            {
-                //ImGui.SetNextWindowBgAlpha(1);
-                ImGui.BeginTooltip();
-                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Glamourer plugin is not loaded.");
-                ImGui.Text("This is a required dependency if you want \r\nto change your outfits based on temperature.");
-                ImGui.EndTooltip();
-            }
-
-            ImGui.EndTabBar();
-        }
-    }
-
-    private void DrawGeneralClimateSettings()
-    {
-        var enableTemperatureMessages = this.Configuration.enableTemperatureMessages;
-        if (ImGui.Checkbox("Temperature update flavor text", ref enableTemperatureMessages))
-        {
-            this.Configuration.enableTemperatureMessages = enableTemperatureMessages;
-
-            this.Configuration.Save();
-        }
-        var selectedChatType = this.Configuration.temperatureChatType;
-        if (ImGui.BeginCombo("Chat Type", selectedChatType.ToString())) // The second parameter is the label previewed before opening the combo.
-        {
-            foreach (XivChatType chatType in XivChatType.GetValues(typeof(XivChatType)))
+            foreach (XivChatType chatType in Enum.GetValues(typeof(XivChatType)))
             {
                 bool is_selected = (chatType == selectedChatType); // You can store your selection however you want, outside or inside your objects
                 if (ImGui.Selectable(chatType.ToString(), is_selected))
                 {
-                    this.Configuration.temperatureChatType = chatType;
-
+                    this.Configuration.flavorTextChatType = chatType;
                     this.Configuration.Save();
                 }
                 if (is_selected)
                     ImGui.SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
             }
             ImGui.EndCombo();
+        }
+        ImGui.PopID();
+    }
+
+    private void DrawClimateSettings()
+    {
+        if (ImGui.BeginTabBar("climateTabBar"))
+        {
+            if (ImGui.BeginTabItem("Temperature"))
+            {
+                DrawTemperatureClimateSettings();
+                ImGui.EndTabItem();
+            }
+
+            if (ImGui.BeginTabItem("Weather"))
+            {
+                DrawWeatherClimateSettings();
+                ImGui.EndTabItem();
+            }
+
+            if (Plugin.Singleton.glamourerAvailable)
+            {
+                if (ImGui.BeginTabItem("Climate Outfits"))
+                {
+                    DrawClimateOutfitSettings();
+                    ImGui.EndTabItem();
+                }
+            }
+            /*if (!Plugin.Singleton.glamourerAvailable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                //ImGui.SetNextWindowBgAlpha(1);
+                ImGui.BeginTooltip();
+                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Glamourer plugin is not loaded.");
+                ImGui.Text("This is a required dependency if you want \r\nto change your outfits based on temperature.");
+                ImGui.EndTooltip();
+            }*/
+
+            ImGui.EndTabBar();
+        }
+    }
+
+    private void DrawTemperatureClimateSettings()
+    {
+        var enableTemperatureMessages = this.Configuration.showTemperatureMessages;
+        if (ImGui.Checkbox("Temperature flavor text", ref enableTemperatureMessages))
+        {
+            this.Configuration.showTemperatureMessages = enableTemperatureMessages;
+
+            this.Configuration.Save();
         }
         bool useCelsius = Configuration.useCelsius.HasValue ? Configuration.useCelsius.Value : false;
         ImGui.Text("Temperature Unit");
@@ -184,6 +210,11 @@ public class ConfigWindow : Window, IDisposable
             ImGui.Text("notify user via chat that no data is available.");
             ImGui.EndTooltip();
         }
+    }
+
+    private void DrawWeatherClimateSettings()
+    {
+        ImGui.Text("There are no settings needed here yet.");
     }
 
     private void DrawClimateOutfitSettings()
@@ -276,8 +307,26 @@ public class ConfigWindow : Window, IDisposable
         }
     }
 
+    private void DrawFoodSettings()
+    {
+        var showFoodMessages = this.Configuration.showFoodMessages;
+        if (ImGui.Checkbox("Food and Drink flavor text", ref showFoodMessages))
+        {
+            this.Configuration.showFoodMessages = showFoodMessages;
+            this.Configuration.Save();
+        }
+
+        var foodAffectsTemperature = this.Configuration.foodAffectsTemperature;
+        if (ImGui.Checkbox("Food and Drink affect temperature", ref foodAffectsTemperature))
+        {
+            this.Configuration.foodAffectsTemperature = foodAffectsTemperature;
+            this.Configuration.Save();
+        }
+    }
+
     private void DrawMiscSettings()
     {
+        ImGui.BeginChild("Pickpocket");
         ImGui.PushItemWidth(120);
         int minPickpocketAmt = this.Configuration.minPickpocketAmt;
         if (ImGui.InputInt("Min Pickpocket Amt", ref minPickpocketAmt))
@@ -293,6 +342,7 @@ public class ConfigWindow : Window, IDisposable
             this.Configuration.Save();
         }
         ImGui.PopItemWidth();
+        ImGui.EndChild();
     }
 
     private void DrawDebugInfo()

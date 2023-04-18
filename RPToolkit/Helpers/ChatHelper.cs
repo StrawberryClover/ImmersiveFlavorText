@@ -77,7 +77,7 @@ namespace RPToolkit
         {
             var chatMsg = new SeString(new TextPayload("This zone doesn't seem to have any temperature data yet! Would you like to help "), new UIForegroundPayload(708), chatLinkPayload, new TextPayload("[suggest some]"),
                         new UIForegroundPayload(0), new TextPayload("?"), RawPayload.LinkTerminator);
-            Plugin.chat.PrintChat(new XivChatEntry { Message = chatMsg, Type = Plugin.Configuration.temperatureChatType, Name = "Temperature" });
+            Plugin.chat.PrintChat(new XivChatEntry { Message = chatMsg, Type = Plugin.Configuration.flavorTextChatType, Name = "Temperature" });
         }
 
         public static void Echo(string message, XivChatType chatType = XivChatType.Echo, string name = "")

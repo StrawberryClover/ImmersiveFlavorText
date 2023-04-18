@@ -55,14 +55,14 @@ namespace RPToolkit.Handlers
                     if (rainWeathers.Contains(*currentWeather) && !rainWeathers.Contains(prevWeather) && !Plugin.Condition[ConditionFlag.UsingParasol])
                     {
                         isRaining = true;
-                        ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Plugin.Configuration.temperatureChatType, "Weather");
+                        ChatHelper.Echo("Gentle raindrops begin to fall upon your skin.", Plugin.Configuration.flavorTextChatType, "Weather");
                         //WindowSystem.GetWindow("No Rain Prompt").IsOpen = false;
                         //WindowSystem.GetWindow("Rain Prompt").IsOpen = true;
                     }
                     else if (!rainWeathers.Contains(*currentWeather) && rainWeathers.Contains(prevWeather))
                     {
                         isRaining = false;
-                        ChatHelper.Echo("The rain begins to clear.", Plugin.Configuration.temperatureChatType, "Weather");
+                        ChatHelper.Echo("The rain begins to clear.", Plugin.Configuration.flavorTextChatType, "Weather");
                         /*WindowSystem.GetWindow("Rain Prompt").IsOpen = false;
                         if (Condition[ConditionFlag.UsingParasol])
                         {

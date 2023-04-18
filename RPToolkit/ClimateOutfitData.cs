@@ -22,7 +22,7 @@ namespace RPToolkit
 
         public enum ClimateConditions : int
         {
-            Only_When_Raining = 1,
+            Only_When_Raining = 1 << 0,
             Heatwave = 1 << 1,
             Very_Hot = 1 << 2,
             Hot = 1 << 3,
@@ -33,6 +33,7 @@ namespace RPToolkit
             Cold = 1 << 8,
             Very_Cold = 1 << 9,
             Frigid = 1 << 10,
+            Swimming = 1 << 11,
         }
 
         public enum Jobs : uint

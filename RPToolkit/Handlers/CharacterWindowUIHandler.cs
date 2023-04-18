@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
 using FFXIVClientStructs.STD;
+using RPToolkit.Data;
 using RPToolkit.Helpers;
 using System;
 using System.Collections.Generic;

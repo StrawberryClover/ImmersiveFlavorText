@@ -29,7 +29,7 @@ namespace RPToolkit.Localizations
                 }),
             hot: new TemperatureDescription(
                 increaseDesc: new string[]{
-                    "You begin to feel hot, it would be nice to have something to help you cool off.",
+                    "You start to feel hot.",
                     "You start to experience discomfort from the rising heat, and you long for something that could offer respite and help you cool down."
                 },
                 decreaseDesc: new string[]{

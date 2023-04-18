@@ -1,5 +1,6 @@
 using Dalamud.Logging;
 using Newtonsoft.Json;
+using RPToolkit.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -27,8 +28,8 @@ namespace RPToolkit
                 {"subAreaID", subAreaID.ToString() },
                 {"subAreaName", subAreaName },
                 {"name", playerName },
-                {"highTemp", highTempSuggestion },
-                {"lowTemp", lowTempSuggestion }
+                {"highTemp", highTempSuggestion + " " + TemperatureHandler.GetTemperatureUnit() },
+                {"lowTemp", lowTempSuggestion + " " + TemperatureHandler.GetTemperatureUnit() }
             };
             if (weatherAdjustment != null) values.Add("weatherAdjustment", weatherAdjustment);
             var content = new FormUrlEncodedContent(values);
