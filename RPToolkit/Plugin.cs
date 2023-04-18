@@ -278,9 +278,16 @@ namespace RPToolkit
                         float temperatureAdjustment = 6f;
                         if (itemHQ) temperatureAdjustment = 12f;
 
-                        if (consumable.temp == Consumables.FoodTemp.Cold)
+                        switch (consumable.temp)
                         {
-                            temperatureAdjustment = -temperatureAdjustment;
+                            case Consumables.FoodTemp.Warm:
+                                temperatureAdjustment /= 2;
+                                break;
+                            case Consumables.FoodTemp.Cold:
+                                temperatureAdjustment = -temperatureAdjustment;
+                                break;
+                            default:
+                                break;
                         }
                         TemperatureHandler.consumableAdjustment += temperatureAdjustment;
                         if (TemperatureHandler.consumableAdjustment > TemperatureHandler.maxConsumableAdjustment) TemperatureHandler.consumableAdjustment = TemperatureHandler.maxConsumableAdjustment;
