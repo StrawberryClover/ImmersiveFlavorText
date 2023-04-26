@@ -50,6 +50,9 @@ namespace RPToolkit.Handlers
             {
                 if (Plugin.Configuration.showTemperatureMessages && Climates.zoneTemperatures.ContainsKey(Plugin.Singleton.clientState.TerritoryType) && (Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != 0 && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high != 0))
                 {
+                    var climate = Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType];
+
+
                     // Random Temperature Variance
                     secPassed++;
                     if (secPassed >= secUntilDivergenceUpdate)
@@ -70,6 +73,16 @@ namespace RPToolkit.Handlers
                         ? Climates.weatherTemperatures[*WeatherHandler.currentWeather]
                         : 0);
                     newTemp += temperatureDivergence;
+
+                    //Altitude Adjustments
+                    float adjustedAltitude = climate.metersAboveSeaLevel;
+                    if (Plugin.Singleton.clientState.LocalPlayer != null)
+                    {
+                        adjustedAltitude += Plugin.Singleton.clientState.LocalPlayer.Position.Y;
+                    }
+                    int altitudeTempDifference = -(CelsiusToFahrenheit(adjustedAltitude * 0.00650f) - 32);
+                    newTemp += altitudeTempDifference;
+
 
                     // Shade Adjustments
                     int shadeAdjustment = 0;
@@ -116,7 +129,8 @@ namespace RPToolkit.Handlers
                             $"\r\n    Weather Modifier: {ConvertTemperature((Climates.weatherTemperatures.ContainsKey(*WeatherHandler.currentWeather) ? Climates.weatherTemperatures[*WeatherHandler.currentWeather] : 0))} " +
                             $"\r\n    Shade: {ConvertTemperature(shadeAdjustment)} " +
                             $"\r\n    Wetness: {ConvertTemperature(((Plugin.Condition[ConditionFlag.Swimming] || Plugin.Condition[ConditionFlag.Diving]) ? -11 : WeatherHandler.isRaining ? -6 : 0))}" +
-                            $"\r\n    Food/Drink: {ConvertTemperature((int)Math.Round(consumableAdjustment))}";
+                            $"\r\n    Food/Drink: {ConvertTemperature((int)Math.Round(consumableAdjustment))}" +
+                            $"\r\n    Altitude: {ConvertTemperature(altitudeTempDifference)} ({(adjustedAltitude > -1 && adjustedAltitude < 0 ? "0" : Math.Round(adjustedAltitude))} yalms above sea level)";
 
                     // Temperature Stage
                     int newStage = currentTemperatureStage;
@@ -267,6 +281,11 @@ namespace RPToolkit.Handlers
         public static float FahrenheitToCelsius(int temperature)
         {
             return (temperature - 32) * 5 / 9;
+        }
+
+        public static int CelsiusToFahrenheit(float temperature)
+        {
+            return (int)MathF.Round(temperature * 1.8f) + 32;
         }
     }
 }

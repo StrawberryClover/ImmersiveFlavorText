@@ -91,26 +91,7 @@ namespace RPToolkit
         uint a6, IntPtr a7);
         private readonly Hook<UseActionDelegate>? useActionHook;
 
-        public static Dictionary<int, string> parasols { get; private set; } = new Dictionary<int, string>{
-            {58001, "Parasol"},
-            {58002, "Sky Blue Parasol"},
-            {58003, "Vermilion Paper Parasol"},
-            {58004, "Plum Paper Parasol"},
-            {58005, "Gold Paper Parasol"},
-            {58006, "Calming Checkered Parasol"},
-            {58007, "Cheerful Checkered Parasol"},
-            {58008, "Classy Checkered Parasol"},
-            {58009, "Pleasant Dot Parasol"},
-            {58010, "Prim Dot Parasol"},
-            {58011, "Pastoral Dot Parasol"},
-            {58016, "Red Moon Parasol"},
-            {58023, "White Lace Parasol"},
-            {58024, "Blue Blossom Parasol"},
-            {58027, "Sabotender Parasol"},
-        };
-
         System.Timers.Timer tick = new System.Timers.Timer(1000);
-
 
         public string Name => "Immersive Flavor Text";
 
@@ -118,6 +99,8 @@ namespace RPToolkit
         public Configuration _configuration { get; init; }
         public static Configuration Configuration { get { return Plugin.Singleton._configuration; } private set { } }
         public static WindowSystem WindowSystem = new("RPToolkit");
+
+        private uint previousTerritory;
         
 
         // I frickin suck at remembering to write comments on personal projects

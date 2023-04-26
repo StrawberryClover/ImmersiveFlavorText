@@ -41,7 +41,7 @@ namespace RPToolkit.Data
         public static Temperature rainForest = new Temperature(75, 91);
         public static Temperature highAltitude = new Temperature(18, 50); //based on altitude of 3.3k yalms (around 3k meters higher than I measured using Sohm Al, which seemed to be about 800) and using Temperate Forest as average temp
         public static Temperature volcanic = new Temperature(100, 125);
-        public static Temperature crystal = new Temperature(30, 55);
+        public static Temperature aetheric = new Temperature(30, 55);
         public static Temperature oceanFloor = new Temperature(30, 38);
         public static Temperature subZero = new Temperature(-66, -81);
         public static Temperature mountains = new Temperature(29, 53);
@@ -63,11 +63,13 @@ namespace RPToolkit.Data
         {
             public Temperature baseTemperature;
             public Dictionary<uint, Temperature> subAreas = new Dictionary<uint, Temperature>();
+            public float metersAboveSeaLevel;
 
-            public ZoneTemperature(Temperature baseTemperature, Dictionary<uint, Temperature>? subAreas = null)
+            public ZoneTemperature(Temperature baseTemperature, Dictionary<uint, Temperature>? subAreas = null, float metersAboveSeaLevel = 0f)
             {
                 this.baseTemperature = baseTemperature;
                 if (subAreas != null) this.subAreas = subAreas;
+                this.metersAboveSeaLevel = metersAboveSeaLevel;
             }
         }
 
@@ -85,7 +87,10 @@ namespace RPToolkit.Data
             // 1. I live in the US, unfortunately, and since I am the main person coming up with these temperature values, it's easier for me to understand since it's what everyone around me uses irl and that I get told on a day to day basis.
             // 2. I just felt like it might be easier to use ints instead of floats, and might be a smaller data type, even though that doesn't really make much of a difference.
             //
-            // Zone ID, Avg High Temp, Avg Low Temp
+            // Edit: why did I do this to myself
+            //
+            //
+            // Zone ID, ((Avg High Temp, Avg Low Temp), SubAreas, Altitude)
             {128, new ZoneTemperature(warmCoastal)}, //Limsa (Upper)
             {129, new ZoneTemperature(warmCoastal)}, //Limsa (Lower)
             {130, new ZoneTemperature(desert,new Dictionary<uint, Temperature>() //Ul dah - Steps of Nald
@@ -112,12 +117,12 @@ namespace RPToolkit.Data
             {146, new ZoneTemperature(desert)}, //Southern Thanalan
             {147, new ZoneTemperature(desert)}, //Northern Thanalan
             {148, new ZoneTemperature(temperateForest)}, //Central Shroud
-            {150, new ZoneTemperature(crystal)}, //[Dungeon]KeepersOfTheLake (Old?)
+            {150, new ZoneTemperature(aetheric)}, //[Dungeon]KeepersOfTheLake (Old?)
             {152, new ZoneTemperature(temperateForest)}, //East Shroud
             {153, new ZoneTemperature(temperateForest)}, //South Shroud
             {154, new ZoneTemperature(temperateForest)}, //North Shroud
             {155, new ZoneTemperature(tundra)}, //Coerthas
-            {156, new ZoneTemperature(crystal)}, //Mor Dhona
+            {156, new ZoneTemperature(aetheric)}, //Mor Dhona
             {157, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (Old?)
             {158, new ZoneTemperature(warmCoastal)}, //[Dungeon]Brayflox (Old?)
             {159, new ZoneTemperature(warmCoastal, new Dictionary<uint, Temperature>() //[Dungeon]WanderersPalace
@@ -127,13 +132,13 @@ namespace RPToolkit.Data
             {160, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]PharosSirius
             {161, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell
             {162, new ZoneTemperature(indoors)}, //[Dungeon]Halatali
-            {163, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]SunkenTemple
+            {163, new ZoneTemperature(indoors)}, //[Dungeon]SunkenTemple
             {164, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TamTara
             {166, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Haukke
             {167, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]AmdaporKeep
             {168, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]StoneVigil
             {169, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TotoRak
-            {170, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]CuttersCry
+            {170, new ZoneTemperature(indoors)}, //[Dungeon]CuttersCry
             {171, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]DzemaelDarkhold
             {172, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]AurumVale
             {175, new ZoneTemperature(warmCoastal)}, //Wolves Den
@@ -170,7 +175,9 @@ namespace RPToolkit.Data
             {339, new ZoneTemperature(warmCoastal)}, //Mist
             {340, new ZoneTemperature(temperateForest)}, //Lavender Beds
             {341, new ZoneTemperature(new Temperature(60, 91))}, //The Goblet
+            {342, new ZoneTemperature(indoors) }, //Private Cottage - The Lavender Beds
             {345, new ZoneTemperature(indoors)}, //Private Cottage - The Goblet
+            {346, new ZoneTemperature(indoors) }, //Private House - The Goblet
             {349, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]CopperbellHM
             {350, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]HaukkeHM
             {351, new ZoneTemperature(indoors)}, //Rising Stones
@@ -184,13 +191,14 @@ namespace RPToolkit.Data
             {365, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]StoneVigilHM
             {367, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]SunkenTempleHM
             {371, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Snowcloak
-            {373, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TamTaraHM
+            {373, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]TamTaraHM
             {374, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Ramuh
             {376, new ZoneTemperature(new Temperature(0, 0))}, //Frontlines
             {377, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Shiva
             {386, new ZoneTemperature(indoors)}, //Goblet Private Quarters
             {387, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]SastashaHM
             {388, new ZoneTemperature(indoors)}, //Gold Saucer - Chocobo Square
+            {392, new ZoneTemperature(indoors) }, //Sanctum of the Twelve
             {395, new ZoneTemperature(new Temperature(0, 0))}, //Intercessory
             {397, new ZoneTemperature(tundra)}, //Coerthas Western Highlands
             {398, new ZoneTemperature(new Temperature(28, 66))}, //The Dravanian Forelands
@@ -214,8 +222,10 @@ namespace RPToolkit.Data
             {447, new ZoneTemperature(new Temperature(18, 28))}, //[Trial]The Limitless Blue (Extreme)
             {456, new ZoneTemperature(new Temperature(0, 0))}, //Ishgard - Ruling Chamber
             {463, new ZoneTemperature(new Temperature(0, 0))}, //Matoyas Cave
-            {478, new ZoneTemperature(new Temperature(0, 0))}, //Idyllshire
+            {478, new ZoneTemperature(mountains)}, //Idyllshire
+            {510, new ZoneTemperature(warmCoastal) }, //[Dungeon]Pharos Sirius
             {554, new ZoneTemperature(new Temperature(0, 0))}, //[PVP] - Fields of Glory (Shatter)
+            {566, new ZoneTemperature(tundra) }, //[Trial]Steps of Faith
             {612, new ZoneTemperature(desert)}, //The Fringes
             {613, new ZoneTemperature(warmCoastal, new Dictionary<uint, Temperature>() //The Ruby Sea
             {
@@ -241,6 +251,7 @@ namespace RPToolkit.Data
             {763, new ZoneTemperature(tundra)}, //Eureka Pagos
             {779, new ZoneTemperature(indoors)}, //[Dungeon]Castrum Fluminis
             {796, new ZoneTemperature(indoors)}, //Masked Carnival (Ul'dah)
+            {798, new ZoneTemperature(indoors) }, //[Trial]Alphascape v1.0
             {813, new ZoneTemperature(temperateForest)}, //Lakeland
             {814, new ZoneTemperature(coldCoastal)}, //Kholusia
             {815, new ZoneTemperature(desert)}, //Amh Araeng
@@ -259,6 +270,7 @@ namespace RPToolkit.Data
             {851, new ZoneTemperature(oceanFloor)}, //[Raid]Eden's Gate: Inundation
             {852, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Gate: Supulture
             {858, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague (Extreme)
+            {879, new ZoneTemperature(indoors) }, //ShB Treasure Dungeon
             {884, new ZoneTemperature(indoors)}, //[Dungeon]The Grand Cosmos
             {898, new ZoneTemperature(oceanFloor, new Dictionary<uint, Temperature>() //[Dungeon]Anamnesis Anyder
             {
@@ -268,7 +280,20 @@ namespace RPToolkit.Data
             {903, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Furor
             {904, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Iconoclasm
             {905, new ZoneTemperature(subZero)}, //[Raid]Eden's Verse: Refulgence
+            {916, new ZoneTemperature(desert, new Dictionary<uint, Temperature>() //[Dungeon]Heroes' Gauntlet
+            {
+                {3520, shrubland }, //A' Milran (Il Mheg)
+                {3521, shrubland }, //Sunken Skyway (Il Mheg)
+                {3522, shrubland }, //Staoigh Creach (Il Mheg)
+                {3516, temperateForest }, //Summer Ballroom (Il Mheg)
+                {3523, temperateForest }, //Sleepless Vigil (Lakeland)
+                {3524, temperateForest }, //Luminous Sanctuary (Lakeland)
+            }) },
+            {918, new ZoneTemperature(indoors) }, //Anamnesis Anyder, instance? This was a suggestion, ((3465) noesis is the sub area suggested)
+            {922, new ZoneTemperature(aetheric) }, //[Trial]Seat of Sacrifice
+            {924, new ZoneTemperature(indoors) }, //[Instanced]MSQ Area, The Shifting Oubliettes of Lyhe Ghiah
             {934, new ZoneTemperature(indoors)}, //[Trial]Castrum Marinum/Emerald Weapon
+            {950, new ZoneTemperature(highAltitude) }, //[Trial]The Cloud Deck
             {957, new ZoneTemperature(rainForest)}, //Thavnair
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
             {958, new ZoneTemperature(tundra)}, //Garlemald
@@ -281,11 +306,13 @@ namespace RPToolkit.Data
                 {3869, indoors} //Artha
             })},
             {979, new ZoneTemperature(tundra)}, //Empyreum
-            {1025, new ZoneTemperature(crystal)}, //[Instance]Gates of Pandaemonium
+            {1002, new ZoneTemperature(aetheric) },
+            {1025, new ZoneTemperature(aetheric)}, //[Instance]Gates of Pandaemonium
             {1036, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (New?)
             {1038, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell (New)
             {1041, new ZoneTemperature(warmCoastal)}, //[Dungeon]Brayflox (New?)
-            {1043, new ZoneTemperature(new Temperature(crystal.low, crystal.low))}, //[Dungeon]Castrum Meridianum
+            {1043, new ZoneTemperature(new Temperature(aetheric.low, aetheric.low))}, //[Dungeon]Castrum Meridianum
+            {1044, new ZoneTemperature(indoors) }, //[Dungeon]Praetorium
             {1045, new ZoneTemperature(volcanic)}, //[Trial]Bowl of Embers (New?)
             {1050, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Dungeon]Alzadaal's Legacy
             {
@@ -293,31 +320,51 @@ namespace RPToolkit.Data
             }) },
             {1056, new ZoneTemperature(indoors)}, //[Dungeon]Alzadaal's Legacy (MSQ Instance)
             {1057, new ZoneTemperature(indoors)}, //Restricted Archives (MSQ Instance)
-            {1063, new ZoneTemperature(crystal)}, //[Dungeon]KeepersOfTheLake (New?)
+            {1063, new ZoneTemperature(aetheric)}, //[Dungeon]KeepersOfTheLake (New?)
             {1066, new ZoneTemperature(indoors)}, //[Dungeon]The Vault
             {1067, new ZoneTemperature(temperateForest)}, //[Trial]Thornmarch (New?)
             {1070, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Dungeon]The Fell Court of Troia
             {
-                {4190, crystal}, //Hydromantic Terraces
+                {4190, aetheric}, //Hydromantic Terraces
             })},
-            {1071, new ZoneTemperature(crystal)}, //[Trial]Storm's Crown
+            {1071, new ZoneTemperature(aetheric)}, //[Trial]Storm's Crown
             {1073, new ZoneTemperature(shrubland)}, //Elysion
-            {1077, new ZoneTemperature(crystal)}, //[Instanced]Zero's Domain
+            {1077, new ZoneTemperature(aetheric)}, //[Instanced]Zero's Domain
             {1078, new ZoneTemperature(indoors)}, //[Instanced]Meghaduta Guest Chambers
-            {1081, new ZoneTemperature(crystal)}, //[Raid]Abyssos: The Fifth Circle
+            {1081, new ZoneTemperature(aetheric)}, //[Raid]Abyssos: The Fifth Circle
             {1083, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Sixth Circle
             {1085, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Seventh Circle
             {1087, new ZoneTemperature(indoors)}, //[Raid]Abyssos: The Eighth Circle
             {1089, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Instanced]The Fell Court of Troia
             {
-                {4190, crystal}, //Hydromantic Terraces
+                {4190, aetheric}, //Hydromantic Terraces
             })},
             {1091, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Instanced]The Fell Court of Troia
             {
-                {4190, crystal}, //Hydromantic Terraces
+                {4190, aetheric}, //Hydromantic Terraces
             })},
-            {1092, new ZoneTemperature(crystal)}, //[Instanced]Storm's Crown
+            {1092, new ZoneTemperature(aetheric)}, //[Instanced]Storm's Crown
             {1093, new ZoneTemperature(indoors)}, //[Instance]Absyssos: The Eighth Circle
+            {1097, new ZoneTemperature(tundra, new Dictionary<uint, Temperature>() //[Dungeon]Lapis Manalis
+            {
+                {4292, tundra }, //Pes Albus
+                {4278, tundra }, //Mons Albus
+                {4279, indoors }, //Vicus Messorum
+                {4280, indoors }, //Fons Manalis
+            }) },
+            {1111, new ZoneTemperature(indoors, new Dictionary<uint, Temperature>() //[Dungeon]The Antitower
+            {
+                {1692, aetheric } //Lower Reaches
+            })},
+            {1119, new ZoneTemperature(tundra, new Dictionary<uint, Temperature>() //[Instance]Lapis Manalis
+            {
+                {4292, tundra }, //Pes Albus
+                {4278, tundra }, //Mons Albus
+                {4279, indoors }, //Vicus Messorum
+                {4280, indoors }, //Fons Manalis
+            }) },
+            {1120, new ZoneTemperature(tundra) }, //[Instanced]Garlemald
+            {1125, new ZoneTemperature(rainForest, metersAboveSeaLevel: 731f) } //[Instance]Khadga
         };
 
         /// <summary>
