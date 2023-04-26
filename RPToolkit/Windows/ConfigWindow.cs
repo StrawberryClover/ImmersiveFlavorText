@@ -352,7 +352,7 @@ public class ConfigWindow : Window, IDisposable
             unsafe {
                 PushAreaDetails("Zone Info", Plugin.Singleton.clientState.TerritoryType.ToString(), Plugin.Data.GetExcelSheet<TerritoryType>()?.GetRow(Plugin.Singleton.clientState.TerritoryType)!.PlaceName.Value!.Name.RawString);
                 PushAreaDetails("Area Info", Plugin.AreaInfo->AreaPlaceNameID.ToString(), Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID).NameNoArticle);
-                PushAreaDetails("SubArea Info", Plugin.AreaInfo->SubAreaPlaceNameID.ToString(), Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->AreaPlaceNameID).NameNoArticle);
+                PushAreaDetails("SubArea Info", Plugin.AreaInfo->SubAreaPlaceNameID.ToString(), Plugin.Data.GetExcelSheet<PlaceName>()?.GetRow(Plugin.AreaInfo->SubAreaPlaceNameID).NameNoArticle);
                 if (TemperatureHandler.debugInfo != null)
                 {
                     ImGui.Separator();

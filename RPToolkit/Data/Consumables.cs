@@ -18,9 +18,11 @@ namespace RPToolkit.Data
         private static string savoryDrink = "As you take a sip of the <temp> <food>, you are hit with a taste of slight sweetness yet subtle hint of salt, creating a refreshing yet savory drink.";
         private static string bitterDrink = "As you take a sip of the <temp> and bitter <food>, you are hit with a strong and bold flavor, perking you up.";
         private static string disgusting = "You slowly take a bite of the <food>, you are immediately hit with an overpowering and unpleasant taste, accompanied by a strong and lingering aftertaste. At least it's 'healthy', right?"; //Archon Loaf...
-        private static string heartySoup = "You begin to eat the <temp> and savory bowl of <food>, you taste of rich and comforting flavors, along with a <temp> and satisfying texture of the broth.";
+        private static string heartySoup = "You take a taste of the <temp> and savory bowl of <food>, the flavors are rich and comforting, and you are met with a <temp> and satisfying texture of the broth.";
         private static string salad = "As you eat the refreshing and <temp> <food>, you can taste the crispness of the lettuce, the rich flavors of the toppings, and the tanginess of the dressing, creating a light and flavorful meal that refreshes your palate and leaves you feeling satisfied.";
         private static string genericSpicy = "You eat the spicy <food>, feeling the fiery heat spread through your mouth and down your throat, making your eyes water and your tongue tingle with intense flavor.";
+        private static string altSpicy = "As you take a bite of the spicy <food>, a tingling sensation spreads across your tongue, followed by a burst of heat that intensifies with each passing second. Your mouth feels alive with a fiery flavor, leaving you breathless yet craving for more.";
+        private static string breakfast = "As you take a bite of your <food>, you taste a savory and slightly salty flavor with a hint of sweetness. The texture is soft and fluffy with a slight crunch on the outside. It feels like it would be the perfect start to a day.";
 
         private static Consumable steak = new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, heartyMeal);
         private static Consumable warmHeartySoup = new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, heartySoup);
@@ -132,6 +134,12 @@ namespace RPToolkit.Data
             {19820, new Consumable(FoodType.LightMeal, FoodTemp.Warm, lightMeal) }, //Egg Foo Young
             {36062, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, heartyMeal) }, //Elpis Deipnon
             {23188, new Consumable(FoodType.HeartyMeal, FoodTemp.Hot, genericSpicy) }, //Ema Datshi
+            {12863, new Consumable(FoodType.LightMeal, FoodTemp.Warm, heartySoup) }, //Emerald Soup
+            {27874, new Consumable(FoodType.LightDrink, FoodTemp.Warm, //Espresso con Panna
+                "As you take a sip of the espresso, you initially taste the rich, bold flavors of the coffee, but soon after, you are hit with a tangy, creamy taste of the sour cream. The two flavors blend together in a surprisingly harmonious way, leaving you with a unique and satisfying taste in your mouth.") },
+            {27892, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, heartySoup) }, //Exquisite Beef Stew
+            {29505, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, breakfast) }, //Farmer's Breakfast
+            {20931, new Consumable(FoodType.Snack, FoodTemp.Lukewarm, sweetTreat) }, //Fat Choco Choco
         };
 
         public struct Consumable
