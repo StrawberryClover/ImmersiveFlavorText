@@ -20,6 +20,7 @@ namespace RPToolkit
             this.customizationString = customizationString;
         }
 
+        [Flags]
         public enum ClimateConditions : int
         {
             Only_When_Raining = 1 << 0,

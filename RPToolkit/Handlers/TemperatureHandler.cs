@@ -170,6 +170,8 @@ namespace RPToolkit.Handlers
                             TempSuggestionWindow.window.IsOpen = true;
                         else
                             ChatHelper.SendSuggestionMessage();
+
+                    debugInfo = "";
                 }
                 currentZone = Plugin.Singleton.clientState.TerritoryType;
             }

@@ -13,7 +13,7 @@ namespace RPToolkit.Localizations
     internal class Localization
     {
         //private static Dictionary<string, List<string>> loadedLocalization;
-        public static LocalizationBase loadedLocalization;
+        public static LocalizationBase lang;
 
         public static void LoadLocalization()
         {
@@ -22,7 +22,7 @@ namespace RPToolkit.Localizations
                 case Dalamud.ClientLanguage.English:
                 default:
                     //loadedLocalization = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(Assembly.GetExecutingAssembly().GetManifestResourceStream("RPToolkit.Localizations.Localization_EN.json"));
-                    loadedLocalization = new Localization_EN();
+                    lang = new Localization_EN();
                     break;
             }
         }

@@ -25,6 +25,8 @@ namespace RPToolkit
         public int minPickpocketAmt = 1;
         public int maxPickpocketAmt = 20000;
 
+        public bool walkWhenEnteringHouse = false;
+
         public List<ClimateOutfitData> climateOutfitData = new List<ClimateOutfitData>();
 
         // the below exist just to make saving less cumbersome
