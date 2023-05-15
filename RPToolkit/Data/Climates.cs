@@ -15,16 +15,16 @@ namespace RPToolkit.Data
         public static SortedDictionary<int, TemperatureDescription> temperatureStages { get; private set; } = new SortedDictionary<int, TemperatureDescription>
         {
             // Temperature, Stage Increase Description, Stage Decrease Description
-            {100, Localization.loadedLocalization.temperatureStages.heatwave},
-            {90, Localization.loadedLocalization.temperatureStages.veryHot },
-            {76, Localization.loadedLocalization.temperatureStages.hot },
-            {68, Localization.loadedLocalization.temperatureStages.roomTemp },
-            {60, Localization.loadedLocalization.temperatureStages.mild },
-            {50, Localization.loadedLocalization.temperatureStages.lukewarm },
-            {40, Localization.loadedLocalization.temperatureStages.chilled },
-            {25, Localization.loadedLocalization.temperatureStages.cold },
-            {10, Localization.loadedLocalization.temperatureStages.veryCold },
-            {0, Localization.loadedLocalization.temperatureStages.frigid }
+            {100, Localization.lang.temperatureStages.heatwave},
+            {90, Localization.lang.temperatureStages.veryHot },
+            {76, Localization.lang.temperatureStages.hot },
+            {68, Localization.lang.temperatureStages.roomTemp },
+            {60, Localization.lang.temperatureStages.mild },
+            {50, Localization.lang.temperatureStages.lukewarm },
+            {40, Localization.lang.temperatureStages.chilled },
+            {25, Localization.lang.temperatureStages.cold },
+            {10, Localization.lang.temperatureStages.veryCold },
+            {0, Localization.lang.temperatureStages.frigid }
         };
 
         public static float hottestHour = 15.5f;
@@ -395,6 +395,7 @@ namespace RPToolkit.Data
             {17, -3}, //Gloom
             {26, 10}, //Heat Waves
             {28, -4}, //Gales
+            {133, 10}, //Umbral Flares
         };
 
         public static int GetTemperature(ushort zoneId, uint areaId, uint subAreaId, float time)

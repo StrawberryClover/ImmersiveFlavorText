@@ -326,7 +326,7 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawMiscSettings()
     {
-        ImGui.BeginChild("Pickpocket");
+        //ImGui.BeginChild("Pickpocket");
         ImGui.PushItemWidth(120);
         int minPickpocketAmt = this.Configuration.minPickpocketAmt;
         if (ImGui.InputInt("Min Pickpocket Amt", ref minPickpocketAmt))
@@ -342,7 +342,15 @@ public class ConfigWindow : Window, IDisposable
             this.Configuration.Save();
         }
         ImGui.PopItemWidth();
-        ImGui.EndChild();
+        //ImGui.EndChild();
+
+        ImGui.Separator();
+        var walkWhenEnteringHouse = this.Configuration.walkWhenEnteringHouse;
+        if (ImGui.Checkbox("Automatically toggle walk when entering player house", ref walkWhenEnteringHouse))
+        {
+            this.Configuration.walkWhenEnteringHouse = walkWhenEnteringHouse;
+            this.Configuration.Save();
+        }
     }
 
     private void DrawDebugInfo()

@@ -61,6 +61,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using RPToolkit.Data;
+using System.Xml.Linq;
 
 namespace RPToolkit
 {
@@ -86,10 +87,6 @@ namespace RPToolkit
         public bool glamourerAvailable { get; private set; }
 
         public static TerritoryInfo* AreaInfo => TerritoryInfo.Instance();
-
-        private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, GameObjectID targetId, uint a4, uint a5,
-        uint a6, IntPtr a7);
-        private readonly Hook<UseActionDelegate>? useActionHook;
 
         System.Timers.Timer tick = new System.Timers.Timer(1000);
 
@@ -134,9 +131,11 @@ namespace RPToolkit
             #region Internal Initialization
             Localizations.Localization.LoadLocalization();
             TimeHelper.Initialize(pluginInterface);
+            MovementHelper.Initialize(pluginInterface);
             CommandHandler.Initialize(pluginInterface);
             WeatherHandler.Initialize(pluginInterface);
             CharacterWindowUIHandler.Initialize(pluginInterface);
+            ConsumableActionHandler.Initialize(pluginInterface);
             #endregion
 
             #region Other Plugin API Initialization
@@ -184,10 +183,6 @@ namespace RPToolkit
             if (clientState.LocalPlayer != null)
                 OnLogin();
 
-            var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
-            useActionHook = Hook<UseActionDelegate>.FromAddress(hookPtr, OnUseAction);
-            useActionHook.Enable();
-
             /*GameObjectArray[] objectArrays =
             {
                 TargetSystem.Instance()->ObjectFilterArray0,
@@ -210,6 +205,92 @@ namespace RPToolkit
                 Condition.ConditionChange += OnConditionChange;
                 //DebugOverlay.window.IsOpen = true;
             }
+
+            Dictionary<string, int> flagResults = new Dictionary<string, int>()
+            {
+                {"A", 0 },
+                {"B", 0 },
+                {"C", 0 },
+                {"D", 0 },
+                {"E", 0 },
+                {"F", 0 },
+                {"G", 0 },
+                {"H", 0 },
+                {"I", 0 },
+            };
+            for (int i = 0; i < 10; i++)
+            {
+                string flagsSet = "";
+                Random rnd = new Random();
+                int randomFlags = rnd.Next(0, Enum.GetValues<TestFlags>().Cast<int>().Sum());
+
+                if ((randomFlags & (int)TestFlags.A) == (int)TestFlags.A)
+                {
+                    flagResults["A"]++;
+                    flagsSet += "A";
+                }
+                if ((randomFlags & (int)TestFlags.B) == (int)TestFlags.B)
+                {
+                    flagResults["B"]++;
+                    flagsSet += "B";
+                }
+                if ((randomFlags & (int)TestFlags.C) == (int)TestFlags.C)
+                {
+                    flagResults["C"]++;
+                    flagsSet += "C";
+                }
+                if ((randomFlags & (int)TestFlags.D) == (int)TestFlags.D)
+                {
+                    flagResults["D"]++;
+                    flagsSet += "D";
+                }
+                if ((randomFlags & (int)TestFlags.E) == (int)TestFlags.E)
+                {
+                    flagResults["E"]++;
+                    flagsSet += "E";
+                }
+                if ((randomFlags & (int)TestFlags.F) == (int)TestFlags.F)
+                {
+                    flagResults["F"]++;
+                    flagsSet += "F";
+                }
+                if ((randomFlags & (int)TestFlags.G) == (int)TestFlags.G)
+                {
+                    flagResults["G"]++;
+                    flagsSet += "G";
+                }
+                if ((randomFlags & (int)TestFlags.H) == (int)TestFlags.H)
+                {
+                    flagResults["H"]++;
+                    flagsSet += "H";
+                }
+                if ((randomFlags & (int)TestFlags.I) == (int)TestFlags.I)
+                {
+                    flagResults["I"]++;
+                    flagsSet += "I";
+                }
+                PluginLog.Information($"Flags Set: {flagsSet}");
+            }
+
+            PluginLog.Information("Results");
+            foreach (KeyValuePair<string, int> kv in flagResults.OrderBy(a => a.Key))
+            {
+                PluginLog.Information($"{kv.Key}: {kv.Value}");
+            }
+        }
+
+        [Flags]
+        public enum TestFlags
+        {
+            A = 1 << 0,
+            B = 1 << 1,
+            C = 1 << 2,
+            D = 1 << 3,
+            E = 1 << 4,
+            F = 1 << 5,
+            G = 1 << 6,
+            H = 1 << 7,
+            I = 1 << 8
         }
 
         public void OnFrameworkUpdate(Framework framework)
@@ -224,62 +305,6 @@ namespace RPToolkit
             //distance -= source.HitboxRadius;
             distance -= target.HitboxRadius;
             return distance;
-        }
-
-        private bool OnUseAction(IntPtr manager, ActionType actionType, uint actionId, GameObjectID targetId, uint a4, uint a5, uint a6, IntPtr a7)
-        {
-            PluginLog.Information($"{actionType}, {actionId}, {targetId.ObjectID}, {a4}, {a5}, {a6}, {a7}");
-            if (actionType == ActionType.Item)
-            {
-                var itemId = actionId;
-                bool itemHQ = false;
-                if (itemId >= 1000000)
-                {
-                    itemHQ = true;
-                    itemId -= 1000000;
-                }
-                PluginLog.Information($"{itemId}, {itemHQ}");
-                var item = Data.GetExcelSheet<Item>().GetRow(itemId);
-                PluginLog.Information($"{(itemHQ ? "(HQ) " : "")}{item.Name.RawString}");
-
-                if (Consumables.consumables.ContainsKey(itemId))
-                {
-                    var consumable = Consumables.consumables[itemId];
-                    if (Configuration.showFoodMessages)
-                    {
-                        string name = "Food";
-                        var flavorText = consumable.flavorText.Replace("<food>", item.Name.RawString.ToLower()).Replace("<temp>", consumable.temp.ToString().ToLower()).Replace("<type>", consumable.type.ToString().ToLower());
-                        if (itemHQ) flavorText = "Wow, what amazing quality, this tastes amazing! " + flavorText;
-                        if (consumable.type == Consumables.FoodType.LightDrink || consumable.type == Consumables.FoodType.RefreshingDrink)
-                            name = "Drink";
-
-                        ChatHelper.Echo(flavorText, Configuration.flavorTextChatType, name);
-                    }
-                    
-                    if (Configuration.foodAffectsTemperature)
-                    {
-                        float temperatureAdjustment = 6f;
-                        if (itemHQ) temperatureAdjustment = 12f;
-
-                        switch (consumable.temp)
-                        {
-                            case Consumables.FoodTemp.Warm:
-                                temperatureAdjustment /= 2;
-                                break;
-                            case Consumables.FoodTemp.Cold:
-                                temperatureAdjustment = -temperatureAdjustment;
-                                break;
-                            default:
-                                break;
-                        }
-                        TemperatureHandler.consumableAdjustment += temperatureAdjustment;
-                        if (TemperatureHandler.consumableAdjustment > TemperatureHandler.maxConsumableAdjustment) TemperatureHandler.consumableAdjustment = TemperatureHandler.maxConsumableAdjustment;
-                        if (TemperatureHandler.consumableAdjustment < -TemperatureHandler.maxConsumableAdjustment) TemperatureHandler.consumableAdjustment = -TemperatureHandler.maxConsumableAdjustment;
-                    }
-                }
-            }
-
-            return useActionHook!.Original(manager, actionType, actionId, targetId, a4, a5, a6, a7);
         }
 
         private void OnConditionChange(ConditionFlag flag, bool value)
@@ -298,6 +323,7 @@ namespace RPToolkit
             tick.Elapsed += PeriodicApiStateCheck;
             tick.Elapsed += PeriodicOutfitChangeCheck;
 
+            PluginLog.Information($"Dev version: {PluginInterface.IsDev}");
             if (PluginInterface.IsDev)
             {
                 tick.Elapsed += DebugStuff;
@@ -335,7 +361,7 @@ namespace RPToolkit
             WindowSystem.RemoveAllWindows();
             CommandHandler.Dispose();
             CharacterWindowUIHandler.Dispose();
-            useActionHook.Dispose();
+            ConsumableActionHandler.Dispose();
 
             AppDomain.CurrentDomain.FirstChanceException -= HandleException;
             this.clientState.TerritoryChanged -= OnTerritoryChange;
@@ -361,6 +387,11 @@ namespace RPToolkit
             //PluginLog.Information(objectType.ToString() + ": " + baseObject.ToString());
             //var c = (FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase*)this.clientState.LocalPlayer.Address;
             //PluginLog.Information($"({c->GetModelType()}) {c->WetnessDepth} : {c->ForcedWetness} : {c->SwimmingWetness} : {c->WeatherWetness}");
+            //var walking = (IntPtr*)SigScanner.GetStaticAddressFromSig("40 38 35 ?? ?? ?? ?? 75 2D");
+            //PluginLog.Information($"Walking: {walking->ToString()}");
+            //*walking = 1;
+            //MovementHelper.SetWalking(!MovementHelper.isWalking);
+            //PluginLog.Information($"Walking: {MovementHelper.isWalking}");
         }
 
         private void GetGameDimensions()
@@ -384,6 +415,8 @@ namespace RPToolkit
         {
             TemperatureHandler.NewZone();
             currentCustomizationString = "";
+
+            if (Configuration.walkWhenEnteringHouse && IsInHouse()) MovementHelper.SetWalking(true);
         }
 
         private void OnLogin(object? sender, EventArgs e) { OnLogin(); }
@@ -416,6 +449,22 @@ namespace RPToolkit
                 Condition[ConditionFlag.WatchingCutscene78] ||
                 Condition[ConditionFlag.BetweenAreas] ||
                 Condition[ConditionFlag.BetweenAreas51]);
+        }
+
+        internal bool IsInHouse()
+        {
+            ushort[] housingAreas = { 
+                282, 283, 284, 573, 608, //Mist
+                342, 343, 344, 574, 609, //Lavender Beds
+                345, 346, 347, 575, 610, //The Goblet
+                649, 650, 651, 654, 655, //Shirogane
+                980, 981, 982, 985, 999 //Ishgard
+            };
+            if (housingAreas.Contains(clientState.TerritoryType))
+            {
+                return true;
+            }
+            else return false;
         }
 
         private void PeriodicApiStateCheck(System.Object? source, System.Timers.ElapsedEventArgs e)
@@ -453,7 +502,7 @@ namespace RPToolkit
         {
             if (glamourerAvailable && !IsPlayerOccupied() && !Condition[ConditionFlag.Fishing])
             {
-                string newCustomizationString = currentCustomizationString;
+                string newCustomizationString = GetGlamourerCurrentEquipment();
                 foreach (var outfitData in Configuration.climateOutfitData)
                 {
                     if (clientState.LocalPlayer?.ClassJob.Id == outfitData.jobID)
