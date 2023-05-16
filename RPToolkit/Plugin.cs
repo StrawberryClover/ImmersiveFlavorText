@@ -98,6 +98,9 @@ namespace RPToolkit
         public static WindowSystem WindowSystem = new("RPToolkit");
 
         private uint previousTerritory;
+
+        private uint previousJobChecked;
+        public event EventHandler<uint> JobChanged;
         
 
         // I frickin suck at remembering to write comments on personal projects
@@ -206,6 +209,8 @@ namespace RPToolkit
                 //DebugOverlay.window.IsOpen = true;
             }
 
+            JobChanged += OnJobChange;
+
             Dictionary<string, int> flagResults = new Dictionary<string, int>()
             {
                 {"A", 0 },
@@ -279,6 +284,11 @@ namespace RPToolkit
             }
         }
 
+        private void OnJobChange(object? sender, uint e)
+        {
+            currentCustomizationString = "";
+        }
+
         [Flags]
         public enum TestFlags
         {
@@ -295,7 +305,11 @@ namespace RPToolkit
 
         public void OnFrameworkUpdate(Framework framework)
         {
-
+            if (this.clientState.LocalPlayer && this.clientState.LocalPlayer.ClassJob.Id != previousJobChecked)
+            {
+                JobChanged?.Invoke(this, this.clientState.LocalPlayer.ClassJob.Id);
+                previousJobChecked = this.clientState.LocalPlayer.ClassJob.Id;
+            }
         }
 
 
@@ -502,7 +516,8 @@ namespace RPToolkit
         {
             if (glamourerAvailable && !IsPlayerOccupied() && !Condition[ConditionFlag.Fishing])
             {
-                string newCustomizationString = GetGlamourerCurrentEquipment();
+                string glamourerData = GetGlamourerCurrentEquipment();
+                string newCustomizationString = glamourerData;
                 foreach (var outfitData in Configuration.climateOutfitData)
                 {
                     if (clientState.LocalPlayer?.ClassJob.Id == outfitData.jobID)
@@ -517,6 +532,7 @@ namespace RPToolkit
 
                             if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Only_When_Raining) //set to only swimming
                             {
+                                PluginLog.Information("Outfit1");
                                 ChangeOutfit(outfitData.customizationString);
                                 return;
                             }
@@ -533,6 +549,7 @@ namespace RPToolkit
 
                                 if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Swimming) //set to only swimming
                                 {
+                                    PluginLog.Information("Outfit2");
                                     ChangeOutfit(outfitData.customizationString);
                                     return;
                                 }
@@ -565,7 +582,9 @@ namespace RPToolkit
                         }
                     }
                 }
-                if (newCustomizationString != currentCustomizationString) ChangeOutfit(newCustomizationString);
+
+                PluginLog.Information("Outfit3");
+                if (newCustomizationString != currentCustomizationString && glamourerData != newCustomizationString) ChangeOutfit(newCustomizationString);
             }
         }
 
