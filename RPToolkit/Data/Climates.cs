@@ -112,12 +112,14 @@ namespace RPToolkit.Data
                 {472, indoors } //Waking Sands
             })},
             {141, new ZoneTemperature(desert)}, //Central Thanalan
+            {142, new ZoneTemperature(new Temperature(83, 83)) }, //[Dungeon]Halatali
             {144, new ZoneTemperature(indoors)}, //Gold Saucer
             {145, new ZoneTemperature(desert)}, //Eastern Thanalan
             {146, new ZoneTemperature(desert)}, //Southern Thanalan
             {147, new ZoneTemperature(desert)}, //Northern Thanalan
             {148, new ZoneTemperature(temperateForest)}, //Central Shroud
             {150, new ZoneTemperature(aetheric)}, //[Dungeon]KeepersOfTheLake (Old?)
+            {151, new ZoneTemperature(aetheric) }, //[ARaid]The World of Darkness
             {152, new ZoneTemperature(temperateForest)}, //East Shroud
             {153, new ZoneTemperature(temperateForest)}, //South Shroud
             {154, new ZoneTemperature(temperateForest)}, //North Shroud
@@ -131,14 +133,14 @@ namespace RPToolkit.Data
             })},
             {160, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]PharosSirius
             {161, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell
-            {162, new ZoneTemperature(indoors)}, //[Dungeon]Halatali
+            {162, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Halatali
             {163, new ZoneTemperature(indoors)}, //[Dungeon]SunkenTemple
             {164, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TamTara
             {166, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Haukke
             {167, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]AmdaporKeep
             {168, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]StoneVigil
             {169, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]TotoRak
-            {170, new ZoneTemperature(indoors)}, //[Dungeon]CuttersCry
+            {170, new ZoneTemperature(desert)}, //[Dungeon]CuttersCry
             {171, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]DzemaelDarkhold
             {172, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]AurumVale
             {175, new ZoneTemperature(warmCoastal)}, //Wolves Den
@@ -159,10 +161,16 @@ namespace RPToolkit.Data
             {208, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Garuda
             {210, new ZoneTemperature(desert)}, //Ul dah - Heart of the Sworn
             {212, new ZoneTemperature(indoors)}, //Waking Sands
+            {214, new ZoneTemperature(warmCoastal) }, //Middle La Noscea
+            {215, new ZoneTemperature(desert) }, //Western Thanalan? Instance?
+            {216, new ZoneTemperature(desert)}, //[Instanced]Western Thanalan
             {250, new ZoneTemperature(warmCoastal)}, //Wolves Den Pier
             {266, new ZoneTemperature(desert)}, //[Instanced]Eastern Thanalan (BLM Job Quest)
             {269, new ZoneTemperature(desert)}, //[Instanced]Moondrip
             {281, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Leviathan
+            {282, new ZoneTemperature(indoors) }, //Private Cottage - Mist
+            {283, new ZoneTemperature(indoors) }, //Private House - Mist
+            {284, new ZoneTemperature(indoors) }, //Private Mansion - Mist
             {286, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
             {288, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoat
             {292, new ZoneTemperature(volcanic)}, //[Trial]Bowl of Embers
@@ -176,25 +184,30 @@ namespace RPToolkit.Data
             {340, new ZoneTemperature(temperateForest)}, //Lavender Beds
             {341, new ZoneTemperature(new Temperature(60, 91))}, //The Goblet
             {342, new ZoneTemperature(indoors) }, //Private Cottage - The Lavender Beds
+            {343, new ZoneTemperature(indoors) }, //Private House - Lavender Beds
+            {344, new ZoneTemperature(indoors) }, //Private Mansion - Lavender Beds
             {345, new ZoneTemperature(indoors)}, //Private Cottage - The Goblet
             {346, new ZoneTemperature(indoors) }, //Private House - The Goblet
+            {347, new ZoneTemperature(indoors) }, //Private Mansion - The Goblet
             {349, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]CopperbellHM
             {350, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]HaukkeHM
             {351, new ZoneTemperature(indoors)}, //Rising Stones
             {352, new ZoneTemperature(warmCoastal)}, //Wolves Den
             {359, new ZoneTemperature(warmCoastal)}, //[Trial]The Whorleater
-            {360, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]HalataliHM
+            {360, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]HalataliHM
             {361, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]HullbreakerIsle
             {362, new ZoneTemperature(warmCoastal)}, //[Dungeon]BrayfloxHM
             {363, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]LostCity
             {364, new ZoneTemperature(temperateForest)}, //[Trial]Thornmarch
             {365, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]StoneVigilHM
             {367, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]SunkenTempleHM
+            {369, new ZoneTemperature(indoors) }, //[Trial]Hydra
             {371, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]Snowcloak
             {373, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]TamTaraHM
             {374, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Ramuh
             {376, new ZoneTemperature(new Temperature(0, 0))}, //Frontlines
-            {377, new ZoneTemperature(new Temperature(0, 0))}, //[Trial]Shiva
+            {377, new ZoneTemperature(subZero)}, //[Trial]Shiva
+            {378, new ZoneTemperature(subZero) }, //[Trial]Shiva
             {386, new ZoneTemperature(indoors)}, //Goblet Private Quarters
             {387, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]SastashaHM
             {388, new ZoneTemperature(indoors)}, //Gold Saucer - Chocobo Square
@@ -219,13 +232,28 @@ namespace RPToolkit.Data
             {436, new ZoneTemperature(new Temperature(18, 28))}, //[Trial]The Limitless Blue
             {439, new ZoneTemperature(new Temperature(0, 0))}, //Ishgard - Chocobo Proving Grounds
             {441, new ZoneTemperature(new Temperature(0, 0))}, //[Dungeon]SohmAl
+            {442, new ZoneTemperature(volcanic) }, //[Raid]Fist of the Father
+            {443, new ZoneTemperature(volcanic) }, //[Raid]Cuff of the Father
             {447, new ZoneTemperature(new Temperature(18, 28))}, //[Trial]The Limitless Blue (Extreme)
             {456, new ZoneTemperature(new Temperature(0, 0))}, //Ishgard - Ruling Chamber
             {463, new ZoneTemperature(new Temperature(0, 0))}, //Matoyas Cave
             {478, new ZoneTemperature(mountains)}, //Idyllshire
             {510, new ZoneTemperature(warmCoastal) }, //[Dungeon]Pharos Sirius
             {554, new ZoneTemperature(new Temperature(0, 0))}, //[PVP] - Fields of Glory (Shatter)
+            {559, new ZoneTemperature(tundra) }, //[Trial]Steps of Faith
             {566, new ZoneTemperature(tundra) }, //[Trial]Steps of Faith
+            {573, new ZoneTemperature(indoors) }, //Mist Apartment Lobby
+            {574, new ZoneTemperature(indoors) }, //Lavender Beds Apartment Lobby
+            {575, new ZoneTemperature(indoors) }, //Goblet Apartment Lobby
+            {577, new ZoneTemperature(highAltitude) }, //[Raid]Containment Bay P1T6
+            {578, new ZoneTemperature(indoors) }, //[Dungeon] The Great Gubal Library
+            {580, new ZoneTemperature(mountains, new Dictionary<uint, Temperature>() //[Raid]Eyes of the Creator
+            {
+                {1840, volcanic }, //Life Support
+            }) },
+            {608, new ZoneTemperature(indoors) }, //Mist Apartment
+            {609, new ZoneTemperature(indoors) }, //Lavender Beds Apartment
+            {610, new ZoneTemperature(indoors) }, //Goblet Apartment
             {612, new ZoneTemperature(desert)}, //The Fringes
             {613, new ZoneTemperature(warmCoastal, new Dictionary<uint, Temperature>() //The Ruby Sea
             {
@@ -236,13 +264,25 @@ namespace RPToolkit.Data
             {621, new ZoneTemperature(desert)}, //The Lochs
             {622, new ZoneTemperature(mountains)}, //The Azim Steppe
             {626, new ZoneTemperature(coldCoastal)}, //[Dungeon]The Sirensong Sea
-            {628, new ZoneTemperature(coldCoastal)}, //Kugane
+            {628, new ZoneTemperature(coldCoastal, null, 9)}, //Kugane
             {635, new ZoneTemperature(desert)}, //Rhalgrs Reach
             {639, new ZoneTemperature(new Temperature(0, 0))}, //Ruby Bazaar Offices
+            {641, new ZoneTemperature(coldCoastal) }, //Shirogane
+            {649, new ZoneTemperature(indoors) }, //Private Cottage - Shirogane
+            {650, new ZoneTemperature(indoors) }, //Private House - Shirogane
+            {651, new ZoneTemperature(indoors) }, //Private Mansion - Shirogane
+            {654, new ZoneTemperature(indoors) }, //Shirogane Apartment Lobby
+            {655, new ZoneTemperature(indoors) }, //Shirogane Apartment
+            {662, new ZoneTemperature(coldCoastal, new Dictionary<uint, Temperature>() //[Dungeon] Kugane Castle
+            {
+                {1968, indoors }, //Hon-maru Manor
+                {1972, indoors }, //Hon-maru Tenshu
+            }) },
             {674, new ZoneTemperature(coldCoastal)}, //(Trial)The Pool of Tribute (Extreme)
             {680, new ZoneTemperature(new Temperature(0, 0))}, //ImOnABoatAgain
             {681, new ZoneTemperature(new Temperature(0, 0))}, //The House of the Fierce
             {683, new ZoneTemperature(new Temperature(0, 0))}, //First Alter of Djanan
+            {689, new ZoneTemperature(desert) }, //[Dungeon]Ala Mhigo
             {719, new ZoneTemperature(desert)}, //[Trial]Emanation
             {720, new ZoneTemperature(desert)}, //[Trial]Emanation (Extreme)
             {730, new ZoneTemperature(highAltitude)}, //[Trial]The Pool of Tribute (Extreme)
@@ -250,6 +290,8 @@ namespace RPToolkit.Data
             {759, new ZoneTemperature(coldCoastal)}, //Doman Enclave
             {763, new ZoneTemperature(tundra)}, //Eureka Pagos
             {779, new ZoneTemperature(indoors)}, //[Dungeon]Castrum Fluminis
+            {789, new ZoneTemperature(desert) }, //[Dungeon]The Burn
+            {792, new ZoneTemperature(desert) }, //Gold Saucer - Leap of Faith - The Fall of Belah'dia
             {796, new ZoneTemperature(indoors)}, //Masked Carnival (Ul'dah)
             {798, new ZoneTemperature(indoors) }, //[Trial]Alphascape v1.0
             {813, new ZoneTemperature(temperateForest)}, //Lakeland
@@ -272,6 +314,7 @@ namespace RPToolkit.Data
             {858, new ZoneTemperature(indoors)}, //[Trial]The Dancing Plague (Extreme)
             {879, new ZoneTemperature(indoors) }, //ShB Treasure Dungeon
             {884, new ZoneTemperature(indoors)}, //[Dungeon]The Grand Cosmos
+            {886, new ZoneTemperature(tundra) }, //The Firmament
             {898, new ZoneTemperature(oceanFloor, new Dictionary<uint, Temperature>() //[Dungeon]Anamnesis Anyder
             {
                 {3461, indoors} //Anamnesis
@@ -280,6 +323,7 @@ namespace RPToolkit.Data
             {903, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Furor
             {904, new ZoneTemperature(highAltitude)}, //[Raid]Eden's Verse: Iconoclasm
             {905, new ZoneTemperature(subZero)}, //[Raid]Eden's Verse: Refulgence
+            {915, new ZoneTemperature(warmCoastal) }, //Gangos
             {916, new ZoneTemperature(desert, new Dictionary<uint, Temperature>() //[Dungeon]Heroes' Gauntlet
             {
                 {3520, shrubland }, //A' Milran (Il Mheg)
@@ -292,7 +336,9 @@ namespace RPToolkit.Data
             {918, new ZoneTemperature(indoors) }, //Anamnesis Anyder, instance? This was a suggestion, ((3465) noesis is the sub area suggested)
             {922, new ZoneTemperature(aetheric) }, //[Trial]Seat of Sacrifice
             {924, new ZoneTemperature(indoors) }, //[Instanced]MSQ Area, The Shifting Oubliettes of Lyhe Ghiah
+            {933, new ZoneTemperature(new Temperature(41, 41)) }, //[Dungeon]Matoya's Relict
             {934, new ZoneTemperature(indoors)}, //[Trial]Castrum Marinum/Emerald Weapon
+            {939, new ZoneTemperature(highAltitude) }, //The Diadem
             {950, new ZoneTemperature(highAltitude) }, //[Trial]The Cloud Deck
             {957, new ZoneTemperature(rainForest)}, //Thavnair
             {956, new ZoneTemperature(temperateForest)}, //Labyrinthos
@@ -306,9 +352,15 @@ namespace RPToolkit.Data
                 {3869, indoors} //Artha
             })},
             {979, new ZoneTemperature(tundra)}, //Empyreum
+            {980, new ZoneTemperature(indoors) }, //Private Cottage - Empyreum
+            {981, new ZoneTemperature(indoors) }, //Private House - Empyreum
+            {982, new ZoneTemperature(indoors) }, //Private Mansion - Empyreum
+            {985, new ZoneTemperature(indoors) }, //Empyreum Apartment Lobby
+            {999, new ZoneTemperature(indoors) }, //Empyreum Apartment
             {1002, new ZoneTemperature(aetheric) },
             {1025, new ZoneTemperature(aetheric)}, //[Instance]Gates of Pandaemonium
             {1036, new ZoneTemperature(new Temperature(77, 77))}, //[Dungeon]Sastasha (New?)
+            {1037, new ZoneTemperature(new Temperature(69, 69)) }, //[Dungeon]Tam-Tara Deepcroft
             {1038, new ZoneTemperature(new Temperature(83, 83))}, //[Dungeon]Copperbell (New)
             {1041, new ZoneTemperature(warmCoastal)}, //[Dungeon]Brayflox (New?)
             {1043, new ZoneTemperature(new Temperature(aetheric.low, aetheric.low))}, //[Dungeon]Castrum Meridianum
@@ -345,6 +397,7 @@ namespace RPToolkit.Data
             })},
             {1092, new ZoneTemperature(aetheric)}, //[Instanced]Storm's Crown
             {1093, new ZoneTemperature(indoors)}, //[Instance]Absyssos: The Eighth Circle
+            {1095, new ZoneTemperature(rainForest, null, 622) }, //Mount Ordeals
             {1097, new ZoneTemperature(tundra, new Dictionary<uint, Temperature>() //[Dungeon]Lapis Manalis
             {
                 {4292, tundra }, //Pes Albus
