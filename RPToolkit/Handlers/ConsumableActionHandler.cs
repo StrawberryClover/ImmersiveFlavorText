@@ -26,6 +26,7 @@ namespace RPToolkit.Handlers
 
         private Stopwatch sw;
         private float messageCooldown = 30f;
+        private string lastMessage;
 
         public ConsumableActionHandler()
         {
@@ -64,7 +65,7 @@ namespace RPToolkit.Handlers
                     if (Plugin.Configuration.showFoodMessages)
                     {
                         float secondsElapsed = sw.ElapsedMilliseconds / 1000f;
-                        if (secondsElapsed >= messageCooldown)
+                        if (secondsElapsed >= messageCooldown || consumable.flavorText != lastMessage)
                         {
                             string name = "Food";
                             var flavorText = consumable.flavorText.Replace("<food>", item.Name.RawString.ToLower()).Replace("<temp>", consumable.temp.ToString().ToLower()).Replace("<type>", consumable.type.ToString().ToLower());
@@ -73,6 +74,7 @@ namespace RPToolkit.Handlers
                                 name = "Drink";
 
                             ChatHelper.Echo(flavorText, Plugin.Configuration.flavorTextChatType, name);
+                            lastMessage = consumable.flavorText;
                             sw.Restart();
                         }
                     }
