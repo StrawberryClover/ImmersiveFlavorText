@@ -27,7 +27,7 @@ namespace RPToolkit.Handlers
         private static int secPassed = 0;
         private static int secUntilDivergenceUpdate = 300;
         private static int temperatureStageShiftSec = 0;
-        private static int temperatureStageShiftCooldown = 1;
+        private static int temperatureStageShiftCooldown = 120;
         public static int temperatureDivergence = 0;
         private static int temperatureDivergenceLimit = 5;
         public static float consumableAdjustment = 0f;
@@ -86,9 +86,9 @@ namespace RPToolkit.Handlers
 
                     // Shade Adjustments
                     int shadeAdjustment = 0;
-                    bool inShade = RaycastSun();
-                    if (Plugin.Configuration.enableShade && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high)
+                    if (Plugin.Configuration.enableShade && (climate.baseTemperature.high != Climates.indoors.high && climate.baseTemperature.low != Climates.indoors.low) && Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.low != Climates.zoneTemperatures[Plugin.Singleton.clientState.TerritoryType].baseTemperature.high)
                     {
+                        bool inShade = RaycastSun();
                         if (inShade && newTemp >= 70)
                         {
                             float shadePerc = (newTemp - 70) / 40f;
