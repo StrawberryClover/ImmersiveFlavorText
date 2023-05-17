@@ -304,7 +304,6 @@ namespace RPToolkit.Localizations
             public override rstring moleLoaf => "";
             public override rstring morelSalad => "";
             public override rstring mors => "";
-            public override rstring mugwortCarp => "";
             public override rstring mulledTea => "";
             public override rstring mushroomSaute => "";
             public override rstring mushroomSkewer => "";

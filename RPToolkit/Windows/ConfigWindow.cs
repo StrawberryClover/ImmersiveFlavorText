@@ -103,6 +103,7 @@ public class ConfigWindow : Window, IDisposable
         {
             foreach (XivChatType chatType in Enum.GetValues(typeof(XivChatType)))
             {
+                if (chatType == XivChatType.None) continue;
                 bool is_selected = (chatType == selectedChatType); // You can store your selection however you want, outside or inside your objects
                 if (ImGui.Selectable(chatType.ToString(), is_selected))
                 {

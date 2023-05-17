@@ -532,7 +532,6 @@ namespace RPToolkit
 
                             if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Only_When_Raining) //set to only swimming
                             {
-                                PluginLog.Information("Outfit1");
                                 ChangeOutfit(outfitData.customizationString);
                                 return;
                             }
@@ -549,7 +548,6 @@ namespace RPToolkit
 
                                 if (outfitData.climateConditions == (int)ClimateOutfitData.ClimateConditions.Swimming) //set to only swimming
                                 {
-                                    PluginLog.Information("Outfit2");
                                     ChangeOutfit(outfitData.customizationString);
                                     return;
                                 }
@@ -582,8 +580,6 @@ namespace RPToolkit
                         }
                     }
                 }
-
-                PluginLog.Information("Outfit3");
                 if (newCustomizationString != currentCustomizationString && glamourerData != newCustomizationString) ChangeOutfit(newCustomizationString);
             }
         }
