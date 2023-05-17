@@ -224,29 +224,29 @@ namespace RPToolkit.Data
             {14138, steak}, //Loaghtan Steak
             {19808, new Consumable(FoodType.RefreshingDrink, FoodTemp.Cold, Localization.lang.consumables.loquatJuice)}, //Loquat Juice
             {4639, steak}, //Marmot Steak
-            //{12847, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.marronGlace)}, //Marron Glace
-            //{27872, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.masalaChai)}, //Masala Chai
-            //{4722, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mashedPopotoes)}, //Mashed Popotoes
-            //{23187, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.matcha)}, //Matcha
-            //{4642, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.meatMiqabob)}, //Meat Miqabob
-            //{28720, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mejillonesalAjillo)}, //Mejillonesal Ajillo
-            //{38262, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.melonJuice)}, //Melon Juice
-            //{38261, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.melonPie)}, //Melon Pie
-            //{4726, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mintLassi)}, //Mint Lassi
-            //{19829, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.misoDengaku)}, //Miso Dengaku
-            //{19834, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.misoSoupWithTofu)}, //MisoSoup With Tofu
-            //{31899, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mistSpinachQuiche)}, //Mist Spinach Quiche
-            //{27875, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mistSpinachSaute)}, //Mist Spinach Saute
-            //{4705, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mizzenmastBiscuit)}, //Mizzenmast Biscuit
-            //{4641, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.moleLoaf)}, //Mole Loaf
-            //{12854, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.morelSalad)}, //Morel Salad
-            //{29498, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mors)}, //Mors
-            //{4663, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mugwortCarp)}, //Mugwort Carp
-            //{4750, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mulledTea)}, //Mulled Tea
-            //{27865, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mushroomSaute)}, //Mushroom Saute
-            //{27868, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mushroomSkewer)}, //Mushroom Skewer
-            //{4652, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.mustardEggs)}, //Mustard Eggs
-            //{4673, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.muttonStew)}, //Mutton Stew
+            {12847, new Consumable(FoodType.Snack, FoodTemp.Lukewarm, Localization.lang.consumables.marronGlace)}, //Marron Glace
+            {27872, new Consumable(FoodType.LightDrink, FoodTemp.Warm, Localization.lang.consumables.masalaChai)}, //Masala Chai
+            {4722, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, Localization.lang.consumables.mashedPopotoes)}, //Mashed Popotoes
+            {23187, new Consumable(FoodType.LightDrink, FoodTemp.Warm, Localization.lang.consumables.matcha)}, //Matcha
+            {4642, new Consumable(FoodType.LightMeal, FoodTemp.Warm, Localization.lang.consumables.meatMiqabob)}, //Meat Miqabob
+            {28720, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, Localization.lang.consumables.mejillonesalAjillo)}, //Mejillonesal Ajillo
+            {38262, new Consumable(FoodType.RefreshingDrink, FoodTemp.Cold, Localization.lang.consumables.melonJuice)}, //Melon Juice
+            {38261, new Consumable(FoodType.LightMeal, FoodTemp.Lukewarm, Localization.lang.consumables.melonPie)}, //Melon Pie
+            {4726, new Consumable(FoodType.RefreshingDrink, FoodTemp.Cold, Localization.lang.consumables.mintLassi)}, //Mint Lassi
+            {19829, new Consumable(FoodType.LightMeal, FoodTemp.Lukewarm, Localization.lang.consumables.misoDengaku)}, //Miso Dengaku
+            {19834, new Consumable(FoodType.LightMeal, FoodTemp.Warm, Localization.lang.consumables.misoSoupWithTofu)}, //MisoSoup With Tofu
+            {31899, new Consumable(FoodType.LightMeal, FoodTemp.Lukewarm, Localization.lang.consumables.mistSpinachQuiche)}, //Mist Spinach Quiche
+            {27875, new Consumable(FoodType.LightMeal, FoodTemp.Warm, Localization.lang.consumables.mistSpinachSaute)}, //Mist Spinach Saute
+            {4705, new Consumable(FoodType.Snack, FoodTemp.Lukewarm, Localization.lang.consumables.mizzenmastBiscuit)}, //Mizzenmast Biscuit
+            {4641, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, Localization.lang.consumables.moleLoaf)}, //Mole Loaf
+            {12854, new Consumable(FoodType.LightMeal, FoodTemp.Lukewarm, Localization.lang.consumables.morelSalad)}, //Morel Salad
+            {29498, new Consumable(FoodType.RefreshingDrink, FoodTemp.Cold, Localization.lang.consumables.mors)}, //Mors
+            {4663, grilledFish}, //Mugwort Carp
+            {4750, new Consumable(FoodType.LightDrink, FoodTemp.Warm, Localization.lang.consumables.mulledTea)}, //Mulled Tea
+            {27865, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, Localization.lang.consumables.mushroomSaute)}, //Mushroom Saute
+            {27868, new Consumable(FoodType.LightMeal, FoodTemp.Warm, Localization.lang.consumables.mushroomSkewer)}, //Mushroom Skewer
+            {4652, new Consumable(FoodType.LightMeal, FoodTemp.Lukewarm, Localization.lang.consumables.mustardEggs)}, //Mustard Eggs
+            {4673, new Consumable(FoodType.HeartyMeal, FoodTemp.Warm, Localization.lang.consumables.muttonStew)}, //Mutton Stew
             //{19839, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.nomadMeatPie)}, //Nomad Meat Pie
             //{27863, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.nutBake)}, //Nut Bake
             //{22434, new Consumable(FoodType., FoodTemp., Localization.lang.consumables.oden)}, //Oden

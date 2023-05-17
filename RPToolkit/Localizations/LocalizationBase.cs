@@ -204,7 +204,6 @@ namespace RPToolkit.Localizations
             public abstract rstring moleLoaf { get; }
             public abstract rstring morelSalad { get; }
             public abstract rstring mors { get; }
-            public abstract rstring mugwortCarp { get; }
             public abstract rstring mulledTea { get; }
             public abstract rstring mushroomSaute { get; }
             public abstract rstring mushroomSkewer { get; }

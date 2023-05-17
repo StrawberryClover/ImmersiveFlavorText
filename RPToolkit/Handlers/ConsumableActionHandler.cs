@@ -68,7 +68,7 @@ namespace RPToolkit.Handlers
                         {
                             string name = "Food";
                             var flavorText = consumable.flavorText.Replace("<food>", item.Name.RawString.ToLower()).Replace("<temp>", consumable.temp.ToString().ToLower()).Replace("<type>", consumable.type.ToString().ToLower());
-                            if (itemHQ) flavorText = "Wow, what amazing quality! " + flavorText;
+                            //if (itemHQ) flavorText = "Wow, what amazing quality! " + flavorText;
                             if (consumable.type == Consumables.FoodType.LightDrink || consumable.type == Consumables.FoodType.RefreshingDrink)
                                 name = "Drink";
 

@@ -27,7 +27,7 @@ namespace RPToolkit.Handlers
         private static int secPassed = 0;
         private static int secUntilDivergenceUpdate = 300;
         private static int temperatureStageShiftSec = 0;
-        private static int temperatureStageShiftCooldown = 120;
+        private static int temperatureStageShiftCooldown = 1;
         public static int temperatureDivergence = 0;
         private static int temperatureDivergenceLimit = 5;
         public static float consumableAdjustment = 0f;

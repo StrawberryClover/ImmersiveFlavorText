@@ -82,9 +82,29 @@ namespace RPToolkit
 
         public static void Echo(string message, XivChatType chatType = XivChatType.Echo, string name = "")
         {
+            XivChatType[] chatsWithNoName =
+            {
+                XivChatType.CustomEmote,
+                XivChatType.StandardEmote,
+                XivChatType.Echo,
+                XivChatType.Debug,
+                XivChatType.Urgent,
+                XivChatType.Notice,
+                XivChatType.SystemMessage,
+                XivChatType.SystemError,
+                XivChatType.GatheringSystemMessage,
+                XivChatType.ErrorMessage,
+                XivChatType.RetainerSale
+            };
+
             var chatMessage = new XivChatEntry();
-            chatMessage.Name = name;
             chatMessage.Message = message;
+            if (!chatsWithNoName.Contains(chatType))
+            {
+                chatMessage.Name = name;
+            }
+            //else if (name != "") chatMessage.Message = $"{name}: {chatMessage.Message}";
+
             chatMessage.Type = chatType;
             Plugin.chat.PrintChat(chatMessage);
         }
