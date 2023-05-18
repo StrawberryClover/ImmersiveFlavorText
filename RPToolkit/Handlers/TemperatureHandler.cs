@@ -103,7 +103,7 @@ namespace RPToolkit.Handlers
                     {
                         newTemp -= 11;
                     }
-                    else if (WeatherHandler.isRaining)
+                    else if (WeatherHandler.isRaining && !Plugin.Condition[ConditionFlag.UsingParasol])
                     {
                         newTemp -= 6;
                     }

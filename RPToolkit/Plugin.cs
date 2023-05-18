@@ -62,6 +62,11 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using RPToolkit.Data;
 using System.Xml.Linq;
+using RPToolkit.Extensions;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using World = Lumina.Excel.GeneratedSheets.World;
+using static Lumina.Data.Parsing.Uld.UldRoot;
+using System.Text.RegularExpressions;
 
 namespace RPToolkit
 {
@@ -331,17 +336,18 @@ namespace RPToolkit
         {
             //would use .net 6 PeriodicTimer but it can't be used in unsafe contexts, research for later
             tick.AutoReset = true;
-            tick.Elapsed += WeatherHandler.CheckWeather;
-            tick.Elapsed += TemperatureHandler.UpdateTemps;
-            tick.Elapsed += GetGameDimensions;
-            tick.Elapsed += PeriodicApiStateCheck;
-            tick.Elapsed += PeriodicOutfitChangeCheck;
 
             PluginLog.Information($"Dev version: {PluginInterface.IsDev}");
             if (PluginInterface.IsDev)
             {
                 tick.Elapsed += DebugStuff;
             }
+
+            tick.Elapsed += WeatherHandler.CheckWeather;
+            tick.Elapsed += TemperatureHandler.UpdateTemps;
+            tick.Elapsed += GetGameDimensions;
+            tick.Elapsed += PeriodicApiStateCheck;
+            tick.Elapsed += PeriodicOutfitChangeCheck;
 
             tick.Start();
         }
@@ -389,23 +395,20 @@ namespace RPToolkit
 
         private void DebugStuff(System.Object? source, System.Timers.ElapsedEventArgs e)
         {
-            //var wetness = *((byte*)this.clientState.LocalPlayer.Address + 0x1B1F);
-            //*((byte*)this.clientState.LocalPlayer.Address + 0x1B1F) = 36;
-            //var wetness = (int*)(clientState.LocalPlayer.Address + 0x2B0);
-            //PluginLog.Information(wetness.ToString());
-            //PluginLog.Information(Control.Instance()->LocalPlayer->Character.CustomizeData);
-            //var charObject = Control.Instance()->LocalPlayer->Character.GameObject..ToString();
-            //var objectType = charObject.GetObjectType();
-            //PluginLog.Information(charObject);
-            //var baseObject = Convert.ChangeType(charObject, objectType);
-            //PluginLog.Information(objectType.ToString() + ": " + baseObject.ToString());
-            //var c = (FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase*)this.clientState.LocalPlayer.Address;
-            //PluginLog.Information($"({c->GetModelType()}) {c->WetnessDepth} : {c->ForcedWetness} : {c->SwimmingWetness} : {c->WeatherWetness}");
-            //var walking = (IntPtr*)SigScanner.GetStaticAddressFromSig("40 38 35 ?? ?? ?? ?? 75 2D");
-            //PluginLog.Information($"Walking: {walking->ToString()}");
-            //*walking = 1;
-            //MovementHelper.SetWalking(!MovementHelper.isWalking);
-            //PluginLog.Information($"Walking: {MovementHelper.isWalking}");
+            /*if (this.clientState.LocalPlayer != null)
+            {
+                if (this.clientState.LocalPlayer is Character managedChara)
+                {
+                    var chara = managedChara.AsNative();
+                    var drawObject = chara->GameObject.DrawObject;
+                    var charaBase = (CharacterBase*)&drawObject->Object;
+                    if (charaBase != null)
+                    {
+                        //charaBase->ForcedWetness = 3f;
+                        //PluginLog.Information($"Depth: {charaBase->WetnessDepth}, Forced: {charaBase->ForcedWetness}, Swimming: {charaBase->SwimmingWetness}, Weather: {charaBase->WeatherWetness}");
+                    }
+                }
+            }*/
         }
 
         private void GetGameDimensions()
@@ -568,8 +571,7 @@ namespace RPToolkit
                                 {
                                     if (TemperatureHandler.currentTemperatureStage == Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key)
                                     {
-                                        if (PluginInterface.IsDev)
-                                            PluginLog.Information(i + ": " + Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value) + " (" + Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key + ")");
+                                        //if (PluginInterface.IsDev) PluginLog.Information(i + ": " + Enum.GetName(typeof(ClimateOutfitData.ClimateConditions), value) + " (" + Climates.temperatureStages.ElementAt((Climates.temperatureStages.Count - 1) - (i - 1)).Key + ")");
 
                                         newCustomizationString = outfitData.customizationString;
                                         correctTemperature = true;

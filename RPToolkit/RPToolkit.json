@@ -2,7 +2,7 @@
   "Author": "Clover",
   "Name": "Immersive Flavor Text",
   "Punchline": "It provides more immersive flavor text.",
-  "Description": "My garbage quality plugin to help me learn how to work with Dalamud.\r\nSomewhat of a RP toolkit, so far it only provides immersive flavor text.\r\n\r\n/pickpocket : Pickpockets target for random amount of gil.",
+  "Description": "My garbage quality plugin to help me learn how to work with Dalamud.\r\nSomewhat of a RP toolkit, so far it only provides immersive flavor text.\r\n\r\n/pickpocket : Pickpockets target for random amount of gil.\r\n/setpose #, /spose # : Specify a number to set your idle animation pose.\r\n/immersiveconfig : Opens up the config window.\r\n/suggestion : Open up the temperature suggestion window.",
   "InternalName": "rpToolkit",
   "ApplicableVersion": "any",
   "Tags": [

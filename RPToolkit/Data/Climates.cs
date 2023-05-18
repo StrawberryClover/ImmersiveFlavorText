@@ -182,7 +182,7 @@ namespace RPToolkit.Data
             {337, new ZoneTemperature(warmCoastal)}, //Wolves Den
             {339, new ZoneTemperature(warmCoastal)}, //Mist
             {340, new ZoneTemperature(temperateForest)}, //Lavender Beds
-            {341, new ZoneTemperature(new Temperature(60, 91))}, //The Goblet
+            {341, new ZoneTemperature(desert, null, 500)}, //The Goblet (60-91 tep prior)
             {342, new ZoneTemperature(indoors) }, //Private Cottage - The Lavender Beds
             {343, new ZoneTemperature(indoors) }, //Private House - Lavender Beds
             {344, new ZoneTemperature(indoors) }, //Private Mansion - Lavender Beds
@@ -264,7 +264,10 @@ namespace RPToolkit.Data
             {621, new ZoneTemperature(desert)}, //The Lochs
             {622, new ZoneTemperature(mountains)}, //The Azim Steppe
             {626, new ZoneTemperature(coldCoastal)}, //[Dungeon]The Sirensong Sea
-            {628, new ZoneTemperature(coldCoastal, null, 9)}, //Kugane
+            {628, new ZoneTemperature(coldCoastal, new Dictionary<uint, Temperature>() //Kugane
+            {
+                {2911, volcanic }, //Bokaisen Hot Springs
+            }, 9)},
             {635, new ZoneTemperature(desert)}, //Rhalgrs Reach
             {639, new ZoneTemperature(new Temperature(0, 0))}, //Ruby Bazaar Offices
             {641, new ZoneTemperature(coldCoastal) }, //Shirogane
